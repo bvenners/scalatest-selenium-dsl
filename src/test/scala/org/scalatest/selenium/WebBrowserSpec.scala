@@ -28,6 +28,95 @@ import org.scalatest.exceptions.TestFailedException
 
 class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with WebBrowser with HtmlUnit {
 
+  describe("textField") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a text field") (pending)
+    it("should, when a valid text field is found, return a TestField instance") (pending)
+    it("should, when multiple matching text fields exist, return the first one") (pending)
+  }
+
+  describe("textArea") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a text area") (pending)
+    it("should, when a valid text field is found, return a TestArea instance") (pending)
+    it("should, when multiple matching text areas exist, return the first one") (pending)
+  }
+
+  describe("radioButton") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a radio button") (pending)
+    it("should, when a valid text field is found, return a RadioButton instance") (pending)
+    it("should, when multiple matching radio buttons exist, return the first one") (pending)
+  }
+
+  describe("checkbox") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a checkbox") (pending)
+    it("should, when a valid text field is found, return a Checkbox instance") (pending)
+    it("should, when multiple matching checkboxes exist, return the first one") (pending)
+  }
+
+  describe("singleSel") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a single-selection list") (pending)
+    it("should, when a valid text field is found, return a SingleSel instance") (pending)
+    it("should, when multiple matching single-selection lists exist, return the first one") (pending)
+  }
+
+  describe("multiSel") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a multiple-selection list") (pending)
+    it("should, when a valid text field is found, return a MultiSel instance") (pending)
+    it("should, when multiple matching multiple-selection lists exist, return the first one") (pending)
+  }
+
+  describe("click on") {
+    it("should throw TFE with valid stack depth if specified item not found") (pending)
+  }
+
+  describe("switch to") {
+    it("should throw TFE with valid stack depth if specified frame not found") (pending)
+    it("should throw TFE with valid stack depth if specified window handle not found") (pending)
+  }
+
+  describe("goBack") {
+    it("should throw TFE with valid stack depth if already at oldest page") (pending)
+  }
+
+  describe("goForward") {
+    it("should throw TFE with valid stack depth if already at newest page") (pending)
+  }
+
+  describe("cookie") {
+    it("should throw TFE with valid stack depth if specified cookie is not found") (pending)
+  }
+
+  describe("find") {
+    it("should return None if specified item not found") (pending)
+    it("should return a defined Option[Element] containing an instance of TextField if specified item is found to be a text field") (pending)
+    it("should return a defined Option[Element] containing an instance of TextArea if specified item is found to be a text area") (pending)
+    it("should return a defined Option[Element] containing an instance of RadioButton if specified item is found to be a radio button") (pending)
+    it("should return a defined Option[Element] containing an instance of Checkbox if specified item is found to be a checkbox") (pending)
+    it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") (pending)
+    it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") (pending)
+    it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") (pending)
+  }
+
+  describe("findAll") {
+    it("should return an empty IndexedSeq if specified item not found") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of TextField if specified item is found to be a text field") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of TextArea if specified item is found to be a text area") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of RadioButton if specified item is found to be a radio button") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of Checkbox if specified item is found to be a checkbox") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") (pending)
+    it("should return a defined IndexedSeq[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") (pending)
+  }
+
+  describe("executeScript") {
+    it("should execute the passed JavaScript") (pending)
+  }
+
   describe("Web Browser") {
 
     it("should go to web page by using url and get its title correctly.") {
@@ -199,17 +288,6 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       click on "submitButton"
     }
     
-    // Some operation not supported in HtmlUnit driver, e.g. switch to alert.
-    // Should be good enough to test the following dsl compiles.
-    ignore("should support switch") {
-      switch to activeElement
-      switch to alert
-      switch to defaultContent
-      switch to frame(0)
-      switch to frame("name")
-      switch to window(windowHandle)
-    }
-    
     it("should navigate to, back, forward and refresh correctly") {
       go to (host + "navigate1.html")
       title should be ("Navigation 1")
@@ -265,6 +343,18 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     it("should support implicitlyWait method") {
       implicitlyWait(Span(10, Seconds))
     }
+  
+    it("should support capturing screenshot") {
+      go to "http://www.artima.com"
+      try {
+        capture
+        capture to ("MyScreenShot.png")
+      }
+      catch {
+        case unsupported: UnsupportedOperationException => 
+          pending
+      }
+    }
     
     ignore("should support wait method") {
       // This example is taken from http://seleniumhq.org/docs/03_webdriver.html
@@ -306,17 +396,16 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       
       title should be ("Cheese! - Google Search")
     }
-  }
-  
-  it("should support capturing screenshot") {
-    go to "http://www.artima.com"
-    try {
-      capture
-      capture to ("MyScreenShot.png")
-    }
-    catch {
-      case unsupported: UnsupportedOperationException => 
-        pending
+        
+    // Some operation not supported in HtmlUnit driver, e.g. switch to alert.
+    // Should be good enough to test the following dsl compiles.
+    ignore("should support switch") {
+      switch to activeElement
+      switch to alert
+      switch to defaultContent
+      switch to frame(0)
+      switch to frame("name")
+      switch to window(windowHandle)
     }
   }
 }

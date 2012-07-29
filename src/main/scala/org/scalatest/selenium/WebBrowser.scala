@@ -433,14 +433,6 @@ import org.scalatest.Assertions.fail
  * submit()
  * </pre>
  * 
- * <p>
- * Alternatively, you can pass in a element on which submit will be called:
- * </p>
- * 
- * <pre class="stHighlight">
- * submit(name("aTextField")) // submit from name("aTextField") ???
- * </pre>
- * 
  * <h2>Switching</h2>
  * 
  * <p>
@@ -642,6 +634,16 @@ import org.scalatest.Assertions.fail
  *
  * val homePage = new HomePage
  * go to homePage
+ * </pre>
+ *
+ * <h2>Executing JavaScript</h2>
+ *
+ * <p>
+ * To execute arbitrary JavaScript, for example, to test some JavaScript functions on your page, pass it to <code>executeScript</code>:
+ * </p>
+ *
+ * <pre>
+ * executeScript("modifyDOM();")
  * </pre>
  *
  * <h2>Querying for elements</h2>
@@ -931,12 +933,8 @@ trait WebBrowser {
     }
   }
   
-  def submit(webElement: WebElement) {
-    webElement.submit()
-  }
-  
   def submit()(implicit driver: WebDriver) {
-    submit(switch to activeElement)
+    (switch to activeElement).submit()
   }
   
   def implicitlyWait(timeout: Span)(implicit driver: WebDriver) {
