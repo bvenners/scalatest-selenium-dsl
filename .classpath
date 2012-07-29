@@ -1,36 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/scala"/>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/test/scala"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" output="target/scala-2.9.0/classes" path="src/main/scala"/>
+	<classpathentry kind="src" output="target/scala-2.9.0/classes" path="src/main/java"/>
+	<classpathentry kind="src" output="target/scala-2.9.0/test-classes" path="src/test/scala"/>
+	<classpathentry kind="src" output="target/scala-2.9.0/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.scalatest/scalatest_2.9.0/jars/scalatest_2.9.0-1.8.RC2.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-java/jars/selenium-java-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-api/jars/selenium-api-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-firefox-driver/jars/selenium-firefox-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-remote-driver/jars/selenium-remote-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/com.google.guava/guava/jars/guava-11.0.1.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.json/json/jars/json-20080701.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.apache.commons/commons-exec/jars/commons-exec-1.1.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.apache.httpcomponents/httpcore/jars/httpcore-4.1.3.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.apache.httpcomponents/httpclient/jars/httpclient-4.1.2.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-safari-driver/jars/selenium-safari-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-chrome-driver/jars/selenium-chrome-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-ie-driver/jars/selenium-ie-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-htmlunit-driver/jars/selenium-htmlunit-driver-2.21.0.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/net.sourceforge.htmlunit/htmlunit/jars/htmlunit-2.9.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/net.sourceforge.htmlunit/htmlunit-core-js/jars/htmlunit-core-js-2.9.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-server/jars/jetty-server-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-util/jars/jetty-util-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-webapp/jars/jetty-webapp-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-servlet/jars/jetty-servlet-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-http/jars/jetty-http-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-security/jars/jetty-security-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.mortbay.jetty/servlet-api/jars/servlet-api-3.0.20100224.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.eclipse.jetty/jetty-io/jars/jetty-io-8.0.1.v20110908.jar"/>
-	<classpathentry kind="var" path="IVY2_REPO/org.seleniumhq.selenium/selenium-support/jars/selenium-support-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-java/jars/selenium-java-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-android-driver/jars/selenium-android-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-remote-driver/jars/selenium-remote-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/cglib/cglib-nodep/jars/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.json/json/jars/json-20080701.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-api/jars/selenium-api-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/com.google.guava/guava/jars/guava-11.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/com.google.code.findbugs/jsr305/jars/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.1.3.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.apache.commons/commons-exec/jars/commons-exec-1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.java.dev.jna/jna/jars/jna-3.4.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.java.dev.jna/platform/jars/platform-3.4.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-chrome-driver/jars/selenium-chrome-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-htmlunit-driver/jars/selenium-htmlunit-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.sourceforge.htmlunit/htmlunit/jars/htmlunit-2.9.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/xalan/xalan/jars/xalan-2.7.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/xalan/serializer/jars/serializer-2.7.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.3.04.jar"/>
+	<classpathentry kind="lib" path="/usr/artima/play-1.2.3/framework/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/usr/artima/play-1.2.3/framework/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.apache.httpcomponents/httpmime/jars/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.sourceforge.htmlunit/htmlunit-core-js/jars/htmlunit-core-js-2.9.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.9.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.sourceforge.nekohtml/nekohtml/jars/nekohtml-1.9.15.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/net.sourceforge.cssparser/cssparser/jars/cssparser-0.9.5.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.w3c.css/sac/jars/sac-1.3.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-firefox-driver/jars/selenium-firefox-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-ie-driver/jars/selenium-ie-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-iphone-driver/jars/selenium-iphone-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-safari-driver/jars/selenium-safari-driver-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.webbitserver/webbit/jars/webbit-0.4.6.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.jboss.netty/netty/bundles/netty-3.2.7.Final.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.seleniumhq.selenium/selenium-support/jars/selenium-support-2.21.0.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-server/jars/jetty-server-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.mortbay.jetty/servlet-api/jars/servlet-api-3.0.20100224.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-continuation/jars/jetty-continuation-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-http/jars/jetty-http-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-io/jars/jetty-io-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-util/jars/jetty-util-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-webapp/jars/jetty-webapp-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-xml/jars/jetty-xml-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-servlet/jars/jetty-servlet-8.0.1.v20110908.jar"/>
+	<classpathentry kind="lib" path="/Users/bv/.ivy2/cache/org.eclipse.jetty/jetty-security/jars/jetty-security-8.0.1.v20110908.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/org/scalatest/scalatest_2.9.1/2.0.M2/scalatest_2.9.1-2.0.M2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

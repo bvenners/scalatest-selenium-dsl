@@ -6,7 +6,7 @@ scalaVersion := "2.9.0"
 
 libraryDependencies ++= Seq( 
   "org.seleniumhq.selenium" % "selenium-java" % "2.21.0",
-  "org.scalatest" % "scalatest_2.9.0" % "1.8.RC2",  
+  "org.scalatest" %% "scalatest" % "2.0.M2",  
   "org.eclipse.jetty" % "jetty-server" % "8.0.1.v20110908" % "test",
   "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "test"
 )

@@ -15,12 +15,7 @@
  */
 package org.scalatest.selenium
 
-import org.scalatest.FunSpec
-import org.scalatest.Reporter
-import org.scalatest.Stopper
-import org.scalatest.Filter
-import org.scalatest.Tracker
-import org.scalatest.Distributor
+import org.scalatest._
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.webapp.WebAppContext
 
@@ -50,15 +45,12 @@ trait JettySpec extends FunSpec {
   
   lazy val host = serverThread.getHost
 
-  override def run(testName: Option[String], reporter: Reporter, stopper: Stopper, filter: Filter,
-              configMap: Map[String, Any], distributor: Option[Distributor], tracker: Tracker) {
+  override def run(testName: Option[String], args: Args) {
     serverThread.start()
     while (!serverThread.isStarted)
       Thread.sleep(10)
     
-    super.run(testName, reporter, stopper, filter, configMap, distributor, tracker)
-    
-    serverThread.done()
+    try super.run(testName, args)
+    finally serverThread.done()
   }
-  
 }
