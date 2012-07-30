@@ -859,7 +859,7 @@ trait WebBrowser {
   implicit def vector2RichIndexedSeq(indexedSeq: IndexedSeq[String]): RichIndexedSeq = new RichIndexedSeq(indexedSeq)
   
   // Should never return null.
-  class StSelect(webElement: WebElement) extends Element {
+  class StSingleSelect(webElement: WebElement) extends Element {
     private val select = new Select(webElement)
     
     def selection = {
@@ -881,14 +881,14 @@ trait WebBrowser {
     }
     
     def value_=(value : String) {
-      try {
-        clearAll()
-      }
-      catch {
-        case e: java.lang.UnsupportedOperationException => // Can happen for single select list
-      }
       select.selectByValue(value)
     }
+    
+    def underlying: WebElement = webElement
+  }
+
+  class StMultiSelect(webElement: WebElement) extends Element {
+    private val select = new Select(webElement)
     
     def clear(value: String) {
       select.deselectByValue(value)
@@ -919,7 +919,7 @@ trait WebBrowser {
     
     def underlying: WebElement = webElement
   }
-
+  
   object go {
     def to(url: String)(implicit driver: WebDriver) {
       driver.get(url)
@@ -1077,9 +1077,13 @@ trait WebBrowser {
   
   def checkbox(elementIdOrName: String)(implicit driver: WebDriver) = new Checkbox(idOrName(elementIdOrName))
   
-  def selectList(webElement: WebElement) = new StSelect(webElement)
+  def singleSel(webElement: WebElement) = new StSingleSelect(webElement)
   
-  def selectList(elementIdOrName: String)(implicit driver: WebDriver) = new StSelect(idOrName(elementIdOrName))
+  def singleSel(elementIdOrName: String)(implicit driver: WebDriver) = new StSingleSelect(idOrName(elementIdOrName))
+  
+  def multiSel(webElement: WebElement) = new StMultiSelect(webElement)
+  
+  def multiSel(elementIdOrName: String)(implicit driver: WebDriver) = new StMultiSelect(idOrName(elementIdOrName))
   
   def button(elementIdOrName: String)(implicit driver: WebDriver): WebElement = idOrName(elementIdOrName)
   

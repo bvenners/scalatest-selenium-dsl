@@ -300,62 +300,52 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "select.html")
       title should be ("Select")
       
-      selectList("select1").value should be ("option1")
-      selectList("select1").value = "option2"
-      selectList("select1").value should be ("option2")
-      selectList("select1").value = "option3"
-      selectList("select1").value should be ("option3")
-      selectList("select1").value = "option1"
-      selectList("select1").value should be ("option1")
+      singleSel("select1").value should be ("option1")
+      singleSel("select1").value = "option2"
+      singleSel("select1").value should be ("option2")
+      singleSel("select1").value = "option3"
+      singleSel("select1").value should be ("option3")
+      singleSel("select1").value = "option1"
+      singleSel("select1").value should be ("option1")
       intercept[org.openqa.selenium.NoSuchElementException] {
-        selectList("select1").value = "other"
+        singleSel("select1").value = "other"
       }
-      selectList("select1").values should have size 1
-      selectList("select1").values(0) should be ("option1")
-      selectList("select1").clear("option2")
-      selectList("select1").value should be ("option1")
-      selectList("select1").clear("option1")
-      selectList("select1").values should have size 1  // single-select cannot be de-selected
-      intercept[UnsupportedOperationException] {
-        selectList("select1").clearAll() // single-select cannot be de-selecte all
-      }
-      selectList("select1").values should have size 1
-      selectList("select1").selections should be (Some(IndexedSeq("option1")))
-      selectList("select1").selections.get should have size 1
       
       // No options selected
-      selectList("select2").selections should be (None)
-      selectList("select2").values should have size 0
-      selectList("select2").values += "option4"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values += "option5"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values should have size 2
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option5")
-      selectList("select2").values += "option6"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values should have size 3
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option5")
-      selectList("select2").values(2) should be ("option6")
-      selectList("select2").selections should be (Some(IndexedSeq("option4", "option5", "option6")))
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
+      multiSel("select2").values += "option4"
+      multiSel("select2").values should be (IndexedSeq("option4"))
+      multiSel("select2").values += "option5"
+      multiSel("select2").values should be (IndexedSeq("option4", "option5"))
+      multiSel("select2").values should have size 2
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option5")
+      multiSel("select2").values += "option6"
+      multiSel("select2").values should be (IndexedSeq("option4", "option5", "option6"))
+      multiSel("select2").values should have size 3
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option5")
+      multiSel("select2").values(2) should be ("option6")
+      multiSel("select2").selections should be (Some(IndexedSeq("option4", "option5", "option6")))
       intercept[org.openqa.selenium.NoSuchElementException] {
-        selectList("select2").values += "other"
+        multiSel("select2").values += "other"
       }
-      selectList("select2").values -= "option5"
-      selectList("select2").values should have size 2
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option6")
-      selectList("select2").clearAll()
-      selectList("select2").selections should be (None)
-      selectList("select2").values should have size 0
+      multiSel("select2").values -= "option5"
+      multiSel("select2").values should have size 2
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option6")
+      multiSel("select2").clearAll()
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
       
       // Test the alternative way to clear
-      selectList("select2").values += "option6"
-      selectList("select2").values should have size 1
-      selectList("select2").values(0) should be ("option6")
-      selectList("select2") clear "option6"
+      multiSel("select2").values += "option6"
+      multiSel("select2").values should have size 1
+      multiSel("select2").values(0) should be ("option6")
+      multiSel("select2") clear "option6"
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
     }
     
     it("should submit form when submit is called on form's element.") {
