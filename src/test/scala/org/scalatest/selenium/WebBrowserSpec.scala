@@ -29,7 +29,14 @@ import org.scalatest.exceptions.TestFailedException
 class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with WebBrowser with HtmlUnit {
 
   describe("textField") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "textfield.html")
+      val caught = intercept[TestFailedException] {
+        textField("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(35))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
     it("should throw TFE with valid stack depth if specified is found but is not a text field") (pending)
     it("should, when a valid text field is found, return a TestField instance") (pending)
     it("should, when multiple matching text fields exist, return the first one") (pending)

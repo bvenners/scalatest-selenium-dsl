@@ -42,7 +42,9 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import org.openqa.selenium.Alert
 import org.openqa.selenium.support.ui.Select
-import org.scalatest.Assertions.fail
+//import org.scalatest.Assertions.fail
+import org.scalatest.exceptions.TestFailedException
+import org.scalatest.exceptions.StackDepthException
 
 /**
  * Trait that provides a domain specific language (DSL) for writing browser-based tests using <a href="http://seleniumhq.org">Selenium</a>.  
@@ -759,7 +761,12 @@ trait WebBrowser {
     
     def value: String = selection match {
       case Some(v) => v
-      case None => fail("The Option on which value was invoked was not defined.")
+      case None => 
+        throw new TestFailedException(
+                     sde => Some("The Option on which value was invoked was not defined."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value", 0)
+                   )
     }
 
     def selection: Option[String] = {
@@ -818,7 +825,12 @@ trait WebBrowser {
     
     def value: String = selection match {
       case Some(v) => v
-      case None => fail("The Option on which value was invoked was not defined.")
+      case None => 
+        throw new TestFailedException(
+                     sde => Some("The Option on which value was invoked was not defined."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value", 0)
+                   )
     }
     
     def value_=(value : String) {
@@ -881,31 +893,142 @@ trait WebBrowser {
   
   def currentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
   
-  def id(elementId: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.id(elementId))
-  
-  def name(elementName: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.name(elementName))
-  
-  def idOrName(elementIdOrName: String)(implicit driver: WebDriver): WebElement = {
+  private def wrapWithTestFailedException(finder: => WebElement, errorPrefix: String): WebElement = {
     try {
-      id(elementIdOrName)
+      finder
     }
     catch {
-      case _ => 
-        name(elementIdOrName)
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some(errorPrefix + " not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "wrapWithTestFailedException", -3)
+                   )
     }
   }
   
-  def xpath(path: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.xpath(path))
+  def id(elementId: String)(implicit driver: WebDriver): WebElement = 
+    try { 
+      driver.findElement(By.id(elementId))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with id '" + elementId + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "id", 1)
+                   )
+    }
   
-  def className(className: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.className(className))
+  def name(elementName: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.name(elementName))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with name '" + elementName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "name", 1)
+                   )
+    }
   
-  def cssSelector(cssSelector: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.cssSelector(cssSelector))
+  def idOrName(elementIdOrName: String)(implicit driver: WebDriver): WebElement = 
+    try {  
+      try {
+        driver.findElement(By.id(elementIdOrName))
+      }
+      catch {
+        case _ => 
+          driver.findElement(By.name(elementIdOrName))
+      }
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with id or name '" + elementIdOrName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "idOrName", 1)
+                   )
+    }
+    
+  def xpath(path: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.xpath(path))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with xpath '" + path + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "xpath", 1)
+                   )
+    }
   
-  def linkText(linkText: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.linkText(linkText))
+  def className(className: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.className(className))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with className '" + className + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "className", 1)
+                   )
+    }
   
-  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.partialLinkText(partialLinkText))
+  def cssSelector(cssSelector: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.cssSelector(cssSelector))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with cssSelector '" + cssSelector + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "cssSelector", 1)
+                   )
+    }
   
-  def tagName(tagName: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.tagName(tagName))
+  def linkText(linkText: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.linkText(linkText))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with linkText '" + linkText + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "linkText", 1)
+                   )
+    }
+  
+  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.partialLinkText(partialLinkText))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with partialLinkText '" + partialLinkText + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "partialLinkText", 1)
+                   )
+    }
+  
+  def tagName(tagName: String)(implicit driver: WebDriver): WebElement = 
+    try {
+      driver.findElement(By.tagName(tagName))
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        throw new TestFailedException(
+                     sde => Some("Element with tagName '" + tagName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "tagName", 1)
+                   )
+    }
   
   def textField(webElement: WebElement) = new TextField(webElement)
   
@@ -1097,6 +1220,48 @@ trait WebBrowser {
           }
         }
     }
+  }
+  
+  private def getStackDepthFun(fileName: String, methodName: String, adjustment: Int = 0): (StackDepthException => Int) = { sde =>
+    getStackDepth(sde.getStackTrace, fileName, methodName, adjustment)
+  }
+  
+  private def getStackDepth(stackTrace: Array[StackTraceElement], fileName: String, methodName: String, adjustment: Int = 0) = {
+    val stackTraceList = stackTrace.toList
+
+    val fileNameIsDesiredList: List[Boolean] =
+      for (element <- stackTraceList) yield
+        element.getFileName == fileName // such as "Checkers.scala"
+
+    val methodNameIsDesiredList: List[Boolean] =
+      for (element <- stackTraceList) yield
+        element.getMethodName == methodName // such as "check"
+
+    // For element 0, the previous file name was not desired, because there is no previous
+    // one, so you start with false. For element 1, it depends on whether element 0 of the stack trace
+    // had the desired file name, and so forth.
+    val previousFileNameIsDesiredList: List[Boolean] = false :: (fileNameIsDesiredList.dropRight(1))
+
+    // Zip these two related lists together. They now have two boolean values together, when both
+    // are true, that's a stack trace element that should be included in the stack depth.
+    val zipped1 = methodNameIsDesiredList zip previousFileNameIsDesiredList
+    val methodNameAndPreviousFileNameAreDesiredList: List[Boolean] =
+      for ((methodNameIsDesired, previousFileNameIsDesired) <- zipped1) yield
+        methodNameIsDesired && previousFileNameIsDesired
+
+    // Zip the two lists together, that when one or the other is true is an include.
+    val zipped2 = fileNameIsDesiredList zip methodNameAndPreviousFileNameAreDesiredList
+    val includeInStackDepthList: List[Boolean] =
+      for ((fileNameIsDesired, methodNameAndPreviousFileNameAreDesired) <- zipped2) yield
+        fileNameIsDesired || methodNameAndPreviousFileNameAreDesired
+
+    val includeDepth = includeInStackDepthList.takeWhile(include => include).length
+    val depth = if (includeDepth == 0 && stackTrace(0).getFileName != fileName && stackTrace(0).getMethodName != methodName) 
+      stackTraceList.takeWhile(st => st.getFileName != fileName || st.getMethodName != methodName).length
+    else
+      includeDepth
+    
+    depth + adjustment
   }
 }
 
