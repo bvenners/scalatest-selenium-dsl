@@ -116,10 +116,32 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("checkbox") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a checkbox") (pending)
-    it("should, when a valid text field is found, return a Checkbox instance") (pending)
-    it("should, when multiple matching checkboxes exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-checkbox.html")
+      val caught = intercept[TestFailedException] {
+        checkbox("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a checkbox") {
+      go to (host + "find-checkbox.html")
+      val caught = intercept[TestFailedException] {
+        checkbox("text1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a Checkbox instance") {
+      go to (host + "find-checkbox.html")
+      val checkbox1 = checkbox("opt1")
+      checkbox1.isSelected should be (true)
+    }
+    it("should, when multiple matching checkboxes exist, return the first one") {
+      go to (host + "find-checkbox.html")
+      val checkbox2 = checkbox("opt2")
+      checkbox2.isSelected should be (false)
+    }
   }
 
   describe("singleSel") {

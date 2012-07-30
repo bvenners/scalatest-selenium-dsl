@@ -831,6 +831,13 @@ trait WebBrowser {
   }
 
   final class Checkbox(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "input" || webElement.getAttribute("type").toLowerCase != "checkbox")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not check box."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
     def select() {
       if (!webElement.isSelected)
         webElement.click()
