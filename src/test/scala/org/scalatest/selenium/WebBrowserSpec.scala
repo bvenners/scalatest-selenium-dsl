@@ -145,15 +145,51 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("singleSel") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a single-selection list") (pending)
-    it("should, when a valid text field is found, return a SingleSel instance") (pending)
-    it("should, when multiple matching single-selection lists exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        singleSel("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a single-selection list") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        singleSel("select2")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a SingleSel instance") {
+      go to (host + "find-select.html")
+      val select1 = singleSel("select1")
+      select1.value should be ("option2")
+    }
+    it("should, when multiple matching single-selection lists exist, return the first one") {
+      go to (host + "find-select.html")
+      val select3 = singleSel("select3")
+      select3.value should be ("option3")
+    }
   }
 
   describe("multiSel") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a multiple-selection list") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        multiSel("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a multiple-selection list") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        multiSel("select1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
     it("should, when a valid text field is found, return a MultiSel instance") (pending)
     it("should, when multiple matching multiple-selection lists exist, return the first one") (pending)
   }

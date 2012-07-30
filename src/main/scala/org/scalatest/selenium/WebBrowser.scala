@@ -860,7 +860,19 @@ trait WebBrowser {
   
   // Should never return null.
   class StSingleSelect(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "select")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     private val select = new Select(webElement)
+    if (select.isMultiple)
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not a single select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     
     def selection = {
       val first = select.getFirstSelectedOption
@@ -888,7 +900,19 @@ trait WebBrowser {
   }
 
   class StMultiSelect(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "select")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     private val select = new Select(webElement)
+    if (!select.isMultiple)
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not a multi select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     
     def clear(value: String) {
       select.deselectByValue(value)
