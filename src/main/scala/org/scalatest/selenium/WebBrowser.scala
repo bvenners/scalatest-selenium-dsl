@@ -722,27 +722,63 @@ trait WebBrowser {
   }
     
   final class FrameIndexTarget(index: Int) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(index)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(index)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame at index '" + index + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
   
   final class FrameNameOrIdTarget(nameOrId: String) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(nameOrId)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(nameOrId)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame with name or ID '" + nameOrId + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
   
   final class FrameWebElementTarget(element: WebElement) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(element)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(element)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame element '" + element + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
 
   final class WindowTarget(nameOrHandle: String) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.window(nameOrHandle)
-    }
+    def switch(driver: WebDriver): WebDriver =
+      try {
+        driver.switchTo.window(nameOrHandle)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchWindowException => 
+          throw new TestFailedException(
+                     sde => Some("Window with nameOrHandle '" + nameOrHandle + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
 
   // TODO: require(webElement.getTagName == "input" || webElement.getTagName == "textarea") ???

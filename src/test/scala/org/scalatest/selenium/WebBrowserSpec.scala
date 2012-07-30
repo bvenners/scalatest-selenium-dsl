@@ -214,8 +214,52 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("switch to") {
-    it("should throw TFE with valid stack depth if specified frame not found") (pending)
-    it("should throw TFE with valid stack depth if specified window handle not found") (pending)
+    it("should switch frame correctly and throw TFE with valid stack depth if specified frame not found") {
+      go to (host + "frame.html")
+      val win = windowHandle
+      switch to frame("frame1")
+      switch to window(win)
+      switch to frame("frame2")
+      
+      switch to window(win)
+      switch to frame(0)
+      switch to window(win)
+      switch to frame(1)
+      
+      switch to window(win)
+      switch to frame(id("frame1"))
+      switch to window(win)
+      switch to frame(id("frame2"))
+      
+      switch to window(win)
+      val caught1= intercept[TestFailedException] {
+        switch to frame("frame3")
+      }
+      caught1.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught1.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+      
+      val caught2 = intercept[TestFailedException] {
+        switch to frame(2)
+      }
+      caught2.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught2.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+      
+      val caught3 = intercept[TestFailedException] {
+        switch to frame(id("text1"))
+      }
+      caught3.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught3.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified window handle not found") {
+      go to (host + "window.html")
+      val handle = windowHandle
+      switch to window(handle) // should be ok
+      val caught = intercept[TestFailedException] {
+        switch to window("Something else")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("goBack") {
