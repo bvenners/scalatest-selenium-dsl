@@ -203,7 +203,14 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("click on") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "index.html")
+      val caught = intercept[TestFailedException] {
+        click on "unknown"
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("switch to") {
