@@ -30,23 +30,60 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
 
   describe("textField") {
     it("should throw TFE with valid stack depth if specified item not found") {
-      go to (host + "textfield.html")
+      go to (host + "find-textfield.html")
       val caught = intercept[TestFailedException] {
         textField("unknown")
       }
-      caught.failedCodeLineNumber should be (Some(35))
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
       caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
     }
-    it("should throw TFE with valid stack depth if specified is found but is not a text field") (pending)
-    it("should, when a valid text field is found, return a TestField instance") (pending)
-    it("should, when multiple matching text fields exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified is found but is not a text field") {
+      go to (host + "find-textfield.html")
+      val caught = intercept[TestFailedException] {
+        textField("area1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a TestField instance") {
+      go to (host + "find-textfield.html")
+      val text1 = textField("text1")
+      text1.value should be ("value1")
+    }
+    it("should, when multiple matching text fields exist, return the first one") {
+      go to (host + "find-textfield.html")
+      val text2 = textField("text2")
+      text2.value should be ("value2")
+    }
   }
 
   describe("textArea") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a text area") (pending)
-    it("should, when a valid text field is found, return a TestArea instance") (pending)
-    it("should, when multiple matching text areas exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-textarea.html")
+      val caught = intercept[TestFailedException] {
+        textArea("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a text area") {
+      go to (host + "find-textarea.html")
+      val caught = intercept[TestFailedException] {
+        textArea("opt1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a TestArea instance") {
+      go to (host + "find-textarea.html")
+      val textarea1 = textArea("textarea1")
+      textarea1.text should be ("value1")
+    }
+    it("should, when multiple matching text areas exist, return the first one") {
+      go to (host + "find-textarea.html")
+      val text2 = textArea("textarea2")
+      text2.text should be ("value2")
+    }
   }
 
   describe("radioButton") {
@@ -162,17 +199,17 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "textarea.html")
       title should be ("Text Area")
       
-      textField("area1").value should be ("")
-      textField("area1").attribute("value") should be ("")
-      textField("area1").value = "area 1 - line 1\narea 1 - line 2"
-      textField("area1").value should be ("area 1 - line 1\narea 1 - line 2")
-      textField("area1").attribute("value") should be ("area 1 - line 1\narea 1 - line 2")
+      textArea("area1").value should be ("")
+      textArea("area1").attribute("value") should be ("")
+      textArea("area1").value = "area 1 - line 1\narea 1 - line 2"
+      textArea("area1").value should be ("area 1 - line 1\narea 1 - line 2")
+      textArea("area1").attribute("value") should be ("area 1 - line 1\narea 1 - line 2")
       
-      textField("area2").value should be ("")
-      textField("area2").attribute("value") should be ("")
-      textField("area2").value = "area 2 - line 1\narea 2 - line 2"
-      textField("area2").value should be ("area 2 - line 1\narea 2 - line 2")
-      textField("area2").attribute("value") should be ("area 2 - line 1\narea 2 - line 2")
+      textArea("area2").value should be ("")
+      textArea("area2").attribute("value") should be ("")
+      textArea("area2").value = "area 2 - line 1\narea 2 - line 2"
+      textArea("area2").value should be ("area 2 - line 1\narea 2 - line 2")
+      textArea("area2").attribute("value") should be ("area 2 - line 1\narea 2 - line 2")
     }
     
     it("should get and set radio button correctly.") {
@@ -414,6 +451,15 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       switch to frame("name")
       switch to window(windowHandle)
     }
+  }
+  
+  def thisLineNumber = {
+    val st = Thread.currentThread.getStackTrace
+
+    if (!st(2).getMethodName.contains("thisLineNumber"))
+      st(2).getLineNumber
+    else
+      st(3).getLineNumber
   }
 }
 

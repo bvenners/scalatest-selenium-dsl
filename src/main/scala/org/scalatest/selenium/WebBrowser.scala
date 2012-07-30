@@ -747,7 +747,33 @@ trait WebBrowser {
 
   // TODO: require(webElement.getTagName == "input" || webElement.getTagName == "textarea") ???
   final class TextField(webElement: WebElement) extends Element {
+    
+    if(webElement.getTagName.toLowerCase != "input" || webElement.getAttribute("type").toLowerCase != "text")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not text field."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
     def value: String = webElement.getAttribute("value")  
+    def value_=(value: String) {
+      webElement.clear()
+      webElement.sendKeys(value)
+    }
+    def text: String = webElement.getText
+    def attribute(name: String): String = webElement.getAttribute(name)
+    def underlying: WebElement = webElement
+  }
+  
+  final class TextArea(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "textarea")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not text area."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
+    def value: String = webElement.getAttribute("value")
     def value_=(value: String) {
       webElement.clear()
       webElement.sendKeys(value)
@@ -893,20 +919,6 @@ trait WebBrowser {
   
   def currentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
   
-  private def wrapWithTestFailedException(finder: => WebElement, errorPrefix: String): WebElement = {
-    try {
-      finder
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
-                     sde => Some(errorPrefix + " not found."),
-                     None,
-                     getStackDepthFun("WebBrowser.scala", "wrapWithTestFailedException", -3)
-                   )
-    }
-  }
-  
   def id(elementId: String)(implicit driver: WebDriver): WebElement = 
     try { 
       driver.findElement(By.id(elementId))
@@ -1033,6 +1045,10 @@ trait WebBrowser {
   def textField(webElement: WebElement) = new TextField(webElement)
   
   def textField(elementIdOrName: String)(implicit driver: WebDriver) = new TextField(idOrName(elementIdOrName))
+  
+  def textArea(webElement: WebElement) = new TextArea(webElement)
+  
+  def textArea(elementIdOrName: String)(implicit driver: WebDriver) = new TextArea(idOrName(elementIdOrName))
   
   def radioButton(groupName: String)(implicit driver: WebDriver) = new RadioButton(groupName, driver)
   
