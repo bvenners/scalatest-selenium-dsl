@@ -869,7 +869,7 @@ trait WebBrowser {
     private val select = new Select(webElement)
     if (select.isMultiple)
       throw new TestFailedException(
-                     sde => Some("Element " + webElement + " is not a single select."),
+                     sde => Some("Element " + webElement + " is not a single-selection list."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "this", 1)
                    )
@@ -909,7 +909,7 @@ trait WebBrowser {
     private val select = new Select(webElement)
     if (!select.isMultiple)
       throw new TestFailedException(
-                     sde => Some("Element " + webElement + " is not a multi select."),
+                     sde => Some("Element " + webElement + " is not a multi-selection list."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "this", 1)
                    )

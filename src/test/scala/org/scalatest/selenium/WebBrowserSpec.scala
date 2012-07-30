@@ -161,7 +161,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
       caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
     }
-    it("should, when a valid text field is found, return a SingleSel instance") {
+    it("should, when a valid single-selection list is found, return a SingleSel instance") {
       go to (host + "find-select.html")
       val select1 = singleSel("select1")
       select1.value should be ("option2")
@@ -190,8 +190,16 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
       caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
     }
-    it("should, when a valid text field is found, return a MultiSel instance") (pending)
-    it("should, when multiple matching multiple-selection lists exist, return the first one") (pending)
+    it("should, when a valid text field is found, return a MultiSel instance") {
+      go to (host + "find-select.html")
+      val select2 = multiSel("select2")
+      select2.values should be (IndexedSeq("option4", "option5"))
+    }
+    it("should, when multiple matching multiple-selection lists exist, return the first one") {
+      go to (host + "find-select.html")
+      val select4 = multiSel("select4")
+      select4.values should be (IndexedSeq("option1", "option3"))
+    }
   }
 
   describe("click on") {
