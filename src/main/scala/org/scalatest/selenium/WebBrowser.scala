@@ -780,11 +780,19 @@ trait WebBrowser {
                    )
       }
   }
+  
+  private def isTextField(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "input" && webElement.getAttribute("type").toLowerCase == "text"
 
-  // TODO: require(webElement.getTagName == "input" || webElement.getTagName == "textarea") ???
+  private def isTextArea(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "textarea"
+  
+  private def isCheckBox(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "input" && webElement.getAttribute("type").toLowerCase == "checkbox"
+      
   final class TextField(webElement: WebElement) extends Element {
     
-    if(webElement.getTagName.toLowerCase != "input" || webElement.getAttribute("type").toLowerCase != "text")
+    if(!isTextField(webElement))
       throw new TestFailedException(
                      sde => Some("Element " + webElement + " is not text field."),
                      None,
@@ -802,7 +810,7 @@ trait WebBrowser {
   }
   
   final class TextArea(webElement: WebElement) extends Element {
-    if(webElement.getTagName.toLowerCase != "textarea")
+    if(!isTextArea(webElement))
       throw new TestFailedException(
                      sde => Some("Element " + webElement + " is not text area."),
                      None,
@@ -819,7 +827,7 @@ trait WebBrowser {
     def underlying: WebElement = webElement
   }
 
-  final class RadioButton(groupName: String, driver: WebDriver) {
+  final class RadioButton(groupName: String, driver: WebDriver) extends Element {
     
     private val groupElements = driver.findElements(By.name(groupName)).toList
     if (groupElements.length == 0)
@@ -864,10 +872,20 @@ trait WebBrowser {
           throw new org.openqa.selenium.NoSuchElementException("Radio button value '" + value + "' not found for group '" + groupName + "'.")
       }
     }
+    
+    def underlying: WebElement = {
+      val radios = driver.findElements(By.name(groupName)).toList
+      radios.find(_.isSelected) match {
+        case Some(radio) => 
+          radio
+        case None =>
+          null
+      }
+    }
   }
 
   final class Checkbox(webElement: WebElement) extends Element {
-    if(webElement.getTagName.toLowerCase != "input" || webElement.getAttribute("type").toLowerCase != "checkbox")
+    if(!isCheckBox(webElement))
       throw new TestFailedException(
                      sde => Some("Element " + webElement + " is not check box."),
                      None,
@@ -1122,6 +1140,46 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "tagName", 1)
                    )
     }
+    
+  def find(elementIdOrNameOrGroupName: String)(implicit driver: WebDriver): Option[Element] = {
+    try {
+      // Try with radio button first.
+      val groupElements = driver.findElements(By.name(elementIdOrNameOrGroupName)).toList
+      if (groupElements.length > 0 && groupElements.forall(e => e.getTagName == "input" && e.getAttribute("type") == "radio"))
+        Some(new RadioButton(elementIdOrNameOrGroupName, driver))
+      else {
+        val element = try {
+          driver.findElement(By.id(elementIdOrNameOrGroupName))
+        }
+        catch {
+          case _ => 
+            driver.findElement(By.name(elementIdOrNameOrGroupName))
+        }
+      
+        if (isTextField(element))
+          Some(new TextField(element))
+        else if (isTextArea(element))
+          Some(new TextArea(element))
+        else if (isCheckBox(element))
+          Some(new Checkbox(element))
+        else if (element.getTagName.toLowerCase == "select") {
+          val select = new Select(element)
+          if (select.isMultiple)
+            Some(new StMultiSelect(element))
+          else
+            Some(new StSingleSelect(element))
+        }
+        else
+          Some(new Element() { def underlying = element })
+      }
+      
+      /**/
+    }
+    catch {
+      case e: org.openqa.selenium.NoSuchElementException => 
+        None
+    }
+  }
   
   def textField(webElement: WebElement) = new TextField(webElement)
   

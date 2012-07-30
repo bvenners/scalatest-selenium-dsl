@@ -274,6 +274,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
 
   describe("cookie") {
     it("should throw TFE with valid stack depth if specified cookie is not found") {
+      go to (host + "index.html")
       val caught = intercept[TestFailedException] {
         cookie("other")
       }
@@ -283,14 +284,73 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("find") {
-    it("should return None if specified item not found") (pending)
-    it("should return a defined Option[Element] containing an instance of TextField if specified item is found to be a text field") (pending)
-    it("should return a defined Option[Element] containing an instance of TextArea if specified item is found to be a text area") (pending)
-    it("should return a defined Option[Element] containing an instance of RadioButton if specified item is found to be a radio button") (pending)
-    it("should return a defined Option[Element] containing an instance of Checkbox if specified item is found to be a checkbox") (pending)
-    it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") (pending)
-    it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") (pending)
-    it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") (pending)
+    it("should return None if specified item not found") {
+      go to (host + "index.html")
+      find("something") should be (None)
+    }
+    it("should return a defined Option[Element] containing an instance of TextField if specified item is found to be a text field") {
+      go to (host + "find-textfield.html")
+      find("text1") match {
+        case Some(textField: TextField) =>
+          textField.value should be ("value1")
+        case other =>
+          fail("Expected Some(textField: TextField), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of TextArea if specified item is found to be a text area") {
+      go to (host + "find-textarea.html")
+      find("textarea1") match {
+        case Some(textArea: TextArea) =>
+          textArea.text should be ("value1")
+        case other => 
+          fail("Expected Some(textArea: TextArea), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of RadioButton if specified item is found to be a radio button") {
+      go to (host + "find-radio.html")
+      find("group2") match {
+        case Some(radio: RadioButton) =>
+          radio.selection should be (None)
+        case other => 
+          fail("Expected Some(radio: RadioButton), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of Checkbox if specified item is found to be a checkbox") {
+      go to (host + "find-checkbox.html")
+      find("opt1") match {
+        case Some(checkbox: Checkbox) => 
+          checkbox.isSelected should be (true)
+        case other => 
+          fail("Expected Some(checkbox: Checkbox), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") {
+      go to (host + "find-select.html")
+      find("select1") match {
+        case Some(singleSel: StSingleSelect) => 
+          singleSel.value should be ("option2")
+        case other => 
+          fail("Expected Some(singleSel: StSingleSelect), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") {
+      go to (host + "find-select.html")
+      find("select2") match {
+        case Some(multiSel: StMultiSelect) => 
+          multiSel.values should be (IndexedSeq("option4", "option5"))
+        case other =>
+          fail("Expected Some(multiSel: StMultiSelect), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") {
+      go to (host + "image.html")
+      find("anImage") match {
+        case Some(element: Element) => 
+          element.tagName should be ("img")
+        case other => 
+          fail("Expected Some(element: Element), but got: " + other)
+      }
+    }
   }
 
   describe("findAll") {
