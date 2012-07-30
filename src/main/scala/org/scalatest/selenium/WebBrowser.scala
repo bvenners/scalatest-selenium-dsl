@@ -1241,7 +1241,11 @@ trait WebBrowser {
       case Some(cookie) => 
         new CookieWrapper(cookie)
       case None =>
-        null
+        throw new TestFailedException(
+                     sde => Some("Cookie '" + name + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "getCookie", 1)
+                   )
     }
   }
   

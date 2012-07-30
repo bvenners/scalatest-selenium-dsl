@@ -262,16 +262,24 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     }
   }
 
+  // Does not seems to be supported by selenium, unless we want to implement the history tracking ourselves.
   describe("goBack") {
     it("should throw TFE with valid stack depth if already at oldest page") (pending)
   }
 
+  // Does not seems to be supported by selenium, unless we want to implement the history tracking ourselves.
   describe("goForward") {
     it("should throw TFE with valid stack depth if already at newest page") (pending)
   }
 
   describe("cookie") {
-    it("should throw TFE with valid stack depth if specified cookie is not found") (pending)
+    it("should throw TFE with valid stack depth if specified cookie is not found") {
+      val caught = intercept[TestFailedException] {
+        cookie("other")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("find") {
@@ -504,13 +512,19 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       cookie("name3").value should be ("value3")
       
       delete cookie "name2"
-      cookie("name2") should be (null)
+      intercept[TestFailedException] {
+        cookie("name2") should be (null)
+      }
       cookie("name1").value should be ("value1")
       cookie("name3").value should be ("value3")
       
       delete all cookies
-      cookie("name1") should be (null)
-      cookie("name3") should be (null)
+      intercept[TestFailedException] {
+        cookie("name1") should be (null)
+      }
+      intercept[TestFailedException] {
+        cookie("name3") should be (null)
+      }
     }
     
     it("should support implicitlyWait method") {
