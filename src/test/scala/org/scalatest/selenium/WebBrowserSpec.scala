@@ -74,7 +74,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
       caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
     }
-    it("should, when a valid text field is found, return a TestArea instance") {
+    it("should, when a valid text area is found, return a TestArea instance") {
       go to (host + "find-textarea.html")
       val textarea1 = textArea("textarea1")
       textarea1.text should be ("value1")
@@ -87,10 +87,32 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("radioButton") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a radio button") (pending)
-    it("should, when a valid text field is found, return a RadioButton instance") (pending)
-    it("should, when multiple matching radio buttons exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-radio.html")
+      val caught = intercept[TestFailedException] {
+        radioButton("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a radio button") {
+      go to (host + "find-radio.html")
+      val caught = intercept[TestFailedException] {
+        radioButton("text1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid radio button is found, return a RadioButton instance") {
+      go to (host + "find-radio.html")
+      val radio = radioButton("group1")
+      radio.selection should be (None) // Radio button works in a group.
+    }
+    it("should, when multiple matching radio buttons exist, return the first one") {
+      go to (host + "find-radio.html")
+      val radio = radioButton("group2")
+      radio.selection should be (None) // Radio button works in a group.
+    }
   }
 
   describe("checkbox") {

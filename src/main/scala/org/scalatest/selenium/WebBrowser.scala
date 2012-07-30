@@ -785,13 +785,27 @@ trait WebBrowser {
 
   final class RadioButton(groupName: String, driver: WebDriver) {
     
+    private val groupElements = driver.findElements(By.name(groupName)).toList
+    if (groupElements.length == 0)
+      throw new TestFailedException(
+                     sde => Some("Radio Button with group name '" + groupName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    if (!groupElements.forall(e => e.getTagName == "input" && e.getAttribute("type") == "radio"))
+      throw new TestFailedException(
+                     sde => Some("Not all elements with name '" + groupName + "' is radio button."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
     def value: String = selection match {
       case Some(v) => v
       case None => 
         throw new TestFailedException(
                      sde => Some("The Option on which value was invoked was not defined."),
                      None,
-                     getStackDepthFun("WebBrowser.scala", "value", 0)
+                     getStackDepthFun("WebBrowser.scala", "value", 1)
                    )
     }
 
@@ -855,7 +869,7 @@ trait WebBrowser {
         throw new TestFailedException(
                      sde => Some("The Option on which value was invoked was not defined."),
                      None,
-                     getStackDepthFun("WebBrowser.scala", "value", 0)
+                     getStackDepthFun("WebBrowser.scala", "value", 1)
                    )
     }
     
