@@ -428,7 +428,26 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
   }
 
   describe("executeScript") {
-    it("should execute the passed JavaScript") (pending)
+    it("should execute the passed JavaScript") {
+      go to (host + "index.html")
+      val result1 = executeScript("return document.title;")
+      result1 should be ("Test Title")
+      val result2 = executeScript("return 'Hello ' + arguments[0]", "ScalaTest")
+      result2 should be ("Hello ScalaTest")
+    }
+  }
+  
+  describe("executeAsyncScript") {
+    it("should execute the passed JavaScript with asynchronous call") {
+      go to (host + "index.html")
+      val script = """
+        var callback = arguments[arguments.length - 1];
+        window.setTimeout(function() {callback('Hello ScalaTest')}, 500);
+        """
+      setScriptTimeout(1 second)
+      val result = executeAsyncScript(script)
+      result should be ("Hello ScalaTest")
+    }
   }
 
   describe("Web Browser") {
@@ -651,7 +670,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     }
     
     it("should support implicitlyWait method") {
-      implicitlyWait(Span(10, Seconds))
+      implicitlyWait(Span(2, Seconds))
     }
   
     it("should support capturing screenshot") {

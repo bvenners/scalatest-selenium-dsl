@@ -42,9 +42,9 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import org.openqa.selenium.Alert
 import org.openqa.selenium.support.ui.Select
-//import org.scalatest.Assertions.fail
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.exceptions.StackDepthException
+import org.openqa.selenium.JavascriptExecutor
 
 /**
  * Trait that provides a domain specific language (DSL) for writing browser-based tests using <a href="http://seleniumhq.org">Selenium</a>.  
@@ -1426,6 +1426,22 @@ trait WebBrowser {
     }
   }
   
+  def executeScript(script: String, args: AnyRef*)(implicit driver: WebDriver): AnyRef =
+    driver match {
+      case executor: JavascriptExecutor => executor.executeScript(script, args.toArray : _*)
+      case _ => throw new UnsupportedOperationException("Web driver " + driver.getClass.getName + " does not support javascript execution.")
+    }
+  
+  def executeAsyncScript(script: String, args: AnyRef*)(implicit driver: WebDriver): AnyRef =
+    driver match {
+      case executor: JavascriptExecutor => executor.executeAsyncScript(script, args.toArray : _*)
+      case _ => throw new UnsupportedOperationException("Web driver " + driver.getClass.getName + " does not support javascript execution.")
+    }
+  
+  def setScriptTimeout(timeout: Span)(implicit driver: WebDriver) {
+    driver.manage().timeouts().setScriptTimeout(timeout.totalNanos, TimeUnit.NANOSECONDS);
+  }
+  
   private def getStackDepthFun(fileName: String, methodName: String, adjustment: Int = 0): (StackDepthException => Int) = { sde =>
     getStackDepth(sde.getStackTrace, fileName, methodName, adjustment)
   }
@@ -1473,6 +1489,7 @@ object WebBrowser extends WebBrowser
 
 trait HtmlUnit extends WebBrowser {
   implicit val webDriver = new HtmlUnitDriver()
+  webDriver.setJavascriptEnabled(true)
 }
 object HtmlUnit extends HtmlUnit
 
