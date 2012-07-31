@@ -1025,6 +1025,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "id", 1)
                    )
     }
+    
+  val ID = (elementId: String, driver: WebDriver) => id(elementId)(driver) 
   
   def name(elementName: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1038,25 +1040,29 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "name", 1)
                    )
     }
+    
+  val NAME = (elementName: String, driver: WebDriver) => name(elementName)(driver)
   
-  def idOrName(elementIdOrName: String)(implicit driver: WebDriver): WebElement = 
-    try {  
+  def element(name: String, lookups: Seq[(String, WebDriver) => WebElement])(implicit driver: WebDriver): WebElement = {
+    var element: WebElement = null
+    lookups.find { c => 
       try {
-        driver.findElement(By.id(elementIdOrName))
-      }
+        element = c(name, driver)
+        true
+      } 
       catch {
-        case _ => 
-          driver.findElement(By.name(elementIdOrName))
+        case _ => false
       }
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
+    } match {
+      case Some(_) => element
+      case None  => 
         throw new TestFailedException(
-                     sde => Some("Element with id or name '" + elementIdOrName + "' not found."),
+                     sde => Some("Element '" + name + "' not found."),
                      None,
-                     getStackDepthFun("WebBrowser.scala", "idOrName", 1)
+                     getStackDepthFun("WebBrowser.scala", "element", 1)
                    )
     }
+  }
     
   def xpath(path: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1070,6 +1076,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "xpath", 1)
                    )
     }
+    
+  val XPATH = (path: String, driver: WebDriver) => xpath(path)(driver)
   
   def className(className: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1083,6 +1091,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "className", 1)
                    )
     }
+    
+  val CLASSNAME = (clazzName: String, driver: WebDriver) => className(clazzName)(driver)
   
   def cssSelector(cssSelector: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1096,6 +1106,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "cssSelector", 1)
                    )
     }
+    
+  val CSSSELECTOR = (selector: String, driver: WebDriver) => cssSelector(selector)(driver)
   
   def linkText(linkText: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1109,6 +1121,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "linkText", 1)
                    )
     }
+    
+  val LINKTEXT = (lText: String, driver: WebDriver) => linkText(lText)(driver)
   
   def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1122,6 +1136,8 @@ trait WebBrowser {
                      getStackDepthFun("WebBrowser.scala", "partialLinkText", 1)
                    )
     }
+    
+  val PARTIALLINKTEXT = (plText: String, driver: WebDriver) => partialLinkText(plText)(driver)
   
   def tagName(tagName: String)(implicit driver: WebDriver): WebElement = 
     try {
@@ -1136,33 +1152,44 @@ trait WebBrowser {
                    )
     }
     
-  def find(elementIdOrNameOrGroupName: String)(implicit driver: WebDriver): Option[Element] = {
-    try {
-      val element = try {
-        driver.findElement(By.id(elementIdOrNameOrGroupName))
-      }
-      catch {
-        case _ => 
-          driver.findElement(By.name(elementIdOrNameOrGroupName))
-      }
-      
-      if (isTextField(element))
-        Some(new TextField(element))
-      else if (isTextArea(element))
-        Some(new TextArea(element))
-      else if (isCheckBox(element))
-        Some(new Checkbox(element))
-      else if (isRadioButton(element))
-        Some(new RadioButton(element))
-      else if (element.getTagName.toLowerCase == "select") {
-        val select = new Select(element)
-        if (select.isMultiple)
-          Some(new MultiSel(element))
-        else
-          Some(new SingleSel(element))
-      }
+  val TAGNAME = (tName: String, driver: WebDriver) => tagName(tName)(driver)
+    
+  private def createTypedElement(element: WebElement): Element = {
+    if (isTextField(element))
+      new TextField(element)
+    else if (isTextArea(element))
+      new TextArea(element)
+    else if (isCheckBox(element))
+      new Checkbox(element)
+    else if (isRadioButton(element))
+      new RadioButton(element)
+    else if (element.getTagName.toLowerCase == "select") {
+      val select = new Select(element)
+      if (select.isMultiple)
+        new MultiSel(element)
       else
-        Some(new Element() { def underlying = element })
+        new SingleSel(element)
+    }
+    else
+      new Element() { def underlying = element }
+  }
+    
+  def find(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver): Option[Element] = {
+    try {
+      // For performance purpose to avoid executing the lookup 2 times.
+      var element: WebElement = null
+      lookups.find { c => 
+        try {
+          element = c(lookupValue, driver)
+          true
+        } 
+        catch {
+          case _ => false
+        }
+      } match {
+        case Some(_) => Some(createTypedElement(element))
+        case None  => None
+      }
     }
     catch {
       case e: org.openqa.selenium.NoSuchElementException => 
@@ -1170,43 +1197,48 @@ trait WebBrowser {
     }
   }
   
-  
-  
   def textField(webElement: WebElement) = new TextField(webElement)
   
-  def textField(elementIdOrName: String)(implicit driver: WebDriver) = new TextField(idOrName(elementIdOrName))
+  def textField(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new TextField(element(lookupValue, lookups))
   
   def textArea(webElement: WebElement) = new TextArea(webElement)
   
-  def textArea(elementIdOrName: String)(implicit driver: WebDriver) = new TextArea(idOrName(elementIdOrName))
+  def textArea(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new TextArea(element(lookupValue, lookups))
   
   def radioButtonGroup(groupName: String)(implicit driver: WebDriver) = new RadioButtonGroup(groupName, driver)
   
   def radioButton(webElement: WebElement) = new RadioButton(webElement)
   
-  def radioButton(elementIdOrName: String)(implicit driver: WebDriver) = new RadioButton(idOrName(elementIdOrName))
+  def radioButton(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new RadioButton(element(lookupValue, lookups))
   
   def checkbox(webElement: WebElement) = new Checkbox(webElement)
   
-  def checkbox(elementIdOrName: String)(implicit driver: WebDriver) = new Checkbox(idOrName(elementIdOrName))
+  def checkbox(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new Checkbox(element(lookupValue, lookups))
   
   def singleSel(webElement: WebElement) = new SingleSel(webElement)
   
-  def singleSel(elementIdOrName: String)(implicit driver: WebDriver) = new SingleSel(idOrName(elementIdOrName))
+  def singleSel(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new SingleSel(element(lookupValue, lookups))
   
   def multiSel(webElement: WebElement) = new MultiSel(webElement)
   
-  def multiSel(elementIdOrName: String)(implicit driver: WebDriver) = new MultiSel(idOrName(elementIdOrName))
+  def multiSel(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new MultiSel(element(lookupValue, lookups))
   
-  def button(elementIdOrName: String)(implicit driver: WebDriver): WebElement = idOrName(elementIdOrName)
+  def button(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver): WebElement = 
+    element(lookupValue, lookups)
   
   object click {
     def on(element: WebElement) {
       element.click()
     }
   
-    def on(elementIdOrName: String)(implicit driver: WebDriver) {
-      on(idOrName(elementIdOrName))
+    def on(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) {
+      on(element(lookupValue, lookups))
     }
   }
   
