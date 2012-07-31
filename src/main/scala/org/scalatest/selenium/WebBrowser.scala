@@ -790,6 +790,9 @@ trait WebBrowser {
   private def isCheckBox(webElement: WebElement): Boolean = 
     webElement.getTagName.toLowerCase == "input" && webElement.getAttribute("type").toLowerCase == "checkbox"
       
+  private def isRadioButton(webElement: WebElement): Boolean = 
+    webElement.getTagName == "input" && webElement.getAttribute("type") == "radio"
+      
   final class TextField(webElement: WebElement) extends Element {
     
     if(!isTextField(webElement))
@@ -826,19 +829,25 @@ trait WebBrowser {
     def attribute(name: String): String = webElement.getAttribute(name)
     def underlying: WebElement = webElement
   }
-
-  final class RadioButton(groupName: String, driver: WebDriver) extends Element {
-    
-    private val groupElements = driver.findElements(By.name(groupName)).toList
-    if (groupElements.length == 0)
+  
+  final class RadioButton(webElement: WebElement) extends Element {
+    if(!isRadioButton(webElement))
       throw new TestFailedException(
-                     sde => Some("Radio Button with group name '" + groupName + "' not found."),
+                     sde => Some("Element " + webElement + " is not radio button."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "this", 1)
                    )
-    if (!groupElements.forall(e => e.getTagName == "input" && e.getAttribute("type") == "radio"))
+    def value: String = webElement.getAttribute("value")
+    def underlying: WebElement = webElement
+  }
+
+  final class RadioButtonGroup(groupName: String, driver: WebDriver) {
+    
+    private def groupElements = driver.findElements(By.name(groupName)).toList.filter(isRadioButton(_))
+    
+    if (groupElements.length == 0)
       throw new TestFailedException(
-                     sde => Some("Not all elements with name '" + groupName + "' is radio button."),
+                     sde => Some("Radio Buttons with group name '" + groupName + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "this", 1)
                    )
@@ -854,8 +863,7 @@ trait WebBrowser {
     }
 
     def selection: Option[String] = {
-      val radios = driver.findElements(By.name(groupName)).toList
-      radios.find(_.isSelected) match {
+      groupElements.find(_.isSelected) match {
         case Some(radio) => 
           Some(radio.getAttribute("value"))
         case None =>
@@ -864,22 +872,11 @@ trait WebBrowser {
     }
     
     def value_=(value: String) {
-      val radios = driver.findElements(By.name(groupName)).toList
-      radios.find(_.getAttribute("value") == value) match {
+      groupElements.find(_.getAttribute("value") == value) match {
         case Some(radio) => 
           radio.click()
         case None =>
           throw new org.openqa.selenium.NoSuchElementException("Radio button value '" + value + "' not found for group '" + groupName + "'.")
-      }
-    }
-    
-    def underlying: WebElement = {
-      val radios = driver.findElements(By.name(groupName)).toList
-      radios.find(_.isSelected) match {
-        case Some(radio) => 
-          radio
-        case None =>
-          null
       }
     }
   }
@@ -903,8 +900,6 @@ trait WebBrowser {
     def underlying: WebElement = webElement
   }
   
-  // TODO: Do I throw an exception from += if it isn't there? Actually I think this may be wrong. Need
-  // To actually do it to the ...
   class RichIndexedSeq(indexedSeq: IndexedSeq[String]) {
       def +(value: String): IndexedSeq[String] = indexedSeq :+ value
       def -(value: String): IndexedSeq[String] = indexedSeq.filter(_ != value)
@@ -1143,43 +1138,39 @@ trait WebBrowser {
     
   def find(elementIdOrNameOrGroupName: String)(implicit driver: WebDriver): Option[Element] = {
     try {
-      // Try with radio button first.
-      val groupElements = driver.findElements(By.name(elementIdOrNameOrGroupName)).toList
-      if (groupElements.length > 0 && groupElements.forall(e => e.getTagName == "input" && e.getAttribute("type") == "radio"))
-        Some(new RadioButton(elementIdOrNameOrGroupName, driver))
-      else {
-        val element = try {
-          driver.findElement(By.id(elementIdOrNameOrGroupName))
-        }
-        catch {
-          case _ => 
-            driver.findElement(By.name(elementIdOrNameOrGroupName))
-        }
-      
-        if (isTextField(element))
-          Some(new TextField(element))
-        else if (isTextArea(element))
-          Some(new TextArea(element))
-        else if (isCheckBox(element))
-          Some(new Checkbox(element))
-        else if (element.getTagName.toLowerCase == "select") {
-          val select = new Select(element)
-          if (select.isMultiple)
-            Some(new MultiSel(element))
-          else
-            Some(new SingleSel(element))
-        }
-        else
-          Some(new Element() { def underlying = element })
+      val element = try {
+        driver.findElement(By.id(elementIdOrNameOrGroupName))
+      }
+      catch {
+        case _ => 
+          driver.findElement(By.name(elementIdOrNameOrGroupName))
       }
       
-      /**/
+      if (isTextField(element))
+        Some(new TextField(element))
+      else if (isTextArea(element))
+        Some(new TextArea(element))
+      else if (isCheckBox(element))
+        Some(new Checkbox(element))
+      else if (isRadioButton(element))
+        Some(new RadioButton(element))
+      else if (element.getTagName.toLowerCase == "select") {
+        val select = new Select(element)
+        if (select.isMultiple)
+          Some(new MultiSel(element))
+        else
+          Some(new SingleSel(element))
+      }
+      else
+        Some(new Element() { def underlying = element })
     }
     catch {
       case e: org.openqa.selenium.NoSuchElementException => 
         None
     }
   }
+  
+  
   
   def textField(webElement: WebElement) = new TextField(webElement)
   
@@ -1189,7 +1180,11 @@ trait WebBrowser {
   
   def textArea(elementIdOrName: String)(implicit driver: WebDriver) = new TextArea(idOrName(elementIdOrName))
   
-  def radioButton(groupName: String)(implicit driver: WebDriver) = new RadioButton(groupName, driver)
+  def radioButtonGroup(groupName: String)(implicit driver: WebDriver) = new RadioButtonGroup(groupName, driver)
+  
+  def radioButton(webElement: WebElement) = new RadioButton(webElement)
+  
+  def radioButton(elementIdOrName: String)(implicit driver: WebDriver) = new RadioButton(idOrName(elementIdOrName))
   
   def checkbox(webElement: WebElement) = new Checkbox(webElement)
   

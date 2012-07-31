@@ -106,12 +106,12 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     it("should, when a valid radio button is found, return a RadioButton instance") {
       go to (host + "find-radio.html")
       val radio = radioButton("group1")
-      radio.selection should be (None) // Radio button works in a group.
+      radio.value should be ("value1")
     }
     it("should, when multiple matching radio buttons exist, return the first one") {
       go to (host + "find-radio.html")
       val radio = radioButton("group2")
-      radio.selection should be (None) // Radio button works in a group.
+      radio.value should be ("value2")
     }
   }
 
@@ -310,7 +310,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "find-radio.html")
       find("group2") match {
         case Some(radio: RadioButton) =>
-          radio.selection should be (None)
+          radio.value should be ("value2")
         case other => 
           fail("Expected Some(radio: RadioButton), but got: " + other)
       }
@@ -419,26 +419,26 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       textArea("area2").attribute("value") should be ("area 2 - line 1\narea 2 - line 2")
     }
     
-    it("should get and set radio button correctly.") {
+    it("should get and set radio button group correctly.") {
       go to (host + "radio.html")
       title should be ("Radio Button")
       
-      radioButton("group1").selection should be (None)
+      radioButtonGroup("group1").selection should be (None)
       intercept[TestFailedException] {
-        radioButton("group1").value
+        radioButtonGroup("group1").value
       }
       
-      radioButton("group1").value = "Option 1"
-      radioButton("group1").value should be ("Option 1")
+      radioButtonGroup("group1").value = "Option 1"
+      radioButtonGroup("group1").value should be ("Option 1")
       
-      radioButton("group1").value = "Option 2"
-      radioButton("group1").value should be ("Option 2")
+      radioButtonGroup("group1").value = "Option 2"
+      radioButtonGroup("group1").value should be ("Option 2")
       
-      radioButton("group1").value = "Option 3"
-      radioButton("group1").value should be ("Option 3")
+      radioButtonGroup("group1").value = "Option 3"
+      radioButtonGroup("group1").value should be ("Option 3")
       
       intercept[org.openqa.selenium.NoSuchElementException] {
-        radioButton("group1").value = "Invalid value"
+        radioButtonGroup("group1").value = "Invalid value"
       }
     }
     
