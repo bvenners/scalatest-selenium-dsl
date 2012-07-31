@@ -913,7 +913,7 @@ trait WebBrowser {
   implicit def vector2RichIndexedSeq(indexedSeq: IndexedSeq[String]): RichIndexedSeq = new RichIndexedSeq(indexedSeq)
   
   // Should never return null.
-  class StSingleSelect(webElement: WebElement) extends Element {
+  class SingleSel(webElement: WebElement) extends Element {
     if(webElement.getTagName.toLowerCase != "select")
       throw new TestFailedException(
                      sde => Some("Element " + webElement + " is not select."),
@@ -953,7 +953,7 @@ trait WebBrowser {
     def underlying: WebElement = webElement
   }
 
-  class StMultiSelect(webElement: WebElement) extends Element {
+  class MultiSel(webElement: WebElement) extends Element {
     if(webElement.getTagName.toLowerCase != "select")
       throw new TestFailedException(
                      sde => Some("Element " + webElement + " is not select."),
@@ -1165,9 +1165,9 @@ trait WebBrowser {
         else if (element.getTagName.toLowerCase == "select") {
           val select = new Select(element)
           if (select.isMultiple)
-            Some(new StMultiSelect(element))
+            Some(new MultiSel(element))
           else
-            Some(new StSingleSelect(element))
+            Some(new SingleSel(element))
         }
         else
           Some(new Element() { def underlying = element })
@@ -1195,13 +1195,13 @@ trait WebBrowser {
   
   def checkbox(elementIdOrName: String)(implicit driver: WebDriver) = new Checkbox(idOrName(elementIdOrName))
   
-  def singleSel(webElement: WebElement) = new StSingleSelect(webElement)
+  def singleSel(webElement: WebElement) = new SingleSel(webElement)
   
-  def singleSel(elementIdOrName: String)(implicit driver: WebDriver) = new StSingleSelect(idOrName(elementIdOrName))
+  def singleSel(elementIdOrName: String)(implicit driver: WebDriver) = new SingleSel(idOrName(elementIdOrName))
   
-  def multiSel(webElement: WebElement) = new StMultiSelect(webElement)
+  def multiSel(webElement: WebElement) = new MultiSel(webElement)
   
-  def multiSel(elementIdOrName: String)(implicit driver: WebDriver) = new StMultiSelect(idOrName(elementIdOrName))
+  def multiSel(elementIdOrName: String)(implicit driver: WebDriver) = new MultiSel(idOrName(elementIdOrName))
   
   def button(elementIdOrName: String)(implicit driver: WebDriver): WebElement = idOrName(elementIdOrName)
   

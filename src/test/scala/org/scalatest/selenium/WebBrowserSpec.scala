@@ -327,19 +327,19 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") {
       go to (host + "find-select.html")
       find("select1") match {
-        case Some(singleSel: StSingleSelect) => 
+        case Some(singleSel: SingleSel) => 
           singleSel.value should be ("option2")
         case other => 
-          fail("Expected Some(singleSel: StSingleSelect), but got: " + other)
+          fail("Expected Some(singleSel: SingleSel), but got: " + other)
       }
     }
     it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") {
       go to (host + "find-select.html")
       find("select2") match {
-        case Some(multiSel: StMultiSelect) => 
+        case Some(multiSel: MultiSel) => 
           multiSel.values should be (IndexedSeq("option4", "option5"))
         case other =>
-          fail("Expected Some(multiSel: StMultiSelect), but got: " + other)
+          fail("Expected Some(multiSel: MultiSel), but got: " + other)
       }
     }
     it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") {
