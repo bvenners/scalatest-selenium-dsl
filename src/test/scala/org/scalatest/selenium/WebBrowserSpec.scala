@@ -171,6 +171,15 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       val select3 = singleSel("select3")
       select3.value should be ("option3")
     }
+    it("should throw TFE with valid stack depth if invalid option is set") {
+      go to (host + "find-select.html")
+      val select1 = singleSel("select1")
+      val caught = intercept[TestFailedException] {
+        select1.value = "something else"
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("multiSel") {
@@ -199,6 +208,15 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "find-select.html")
       val select4 = multiSel("select4")
       select4.values should be (IndexedSeq("option1", "option3"))
+    }
+    it("should throw TFE with valid stack depth if invalid option is set") {
+      go to (host + "find-select.html")
+      val select2 = multiSel("select2")
+      val caught = intercept[TestFailedException] {
+        select2.values = Seq("option6", "something else")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
     }
   }
 
@@ -552,7 +570,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       singleSel("select1").value should be ("option3")
       singleSel("select1").value = "option1"
       singleSel("select1").value should be ("option1")
-      intercept[org.openqa.selenium.NoSuchElementException] {
+      intercept[TestFailedException] {
         singleSel("select1").value = "other"
       }
       
@@ -573,7 +591,7 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       multiSel("select2").values(1) should be ("option5")
       multiSel("select2").values(2) should be ("option6")
       multiSel("select2").selections should be (Some(IndexedSeq("option4", "option5", "option6")))
-      intercept[org.openqa.selenium.NoSuchElementException] {
+      intercept[TestFailedException] {
         multiSel("select2").values += "other"
       }
       multiSel("select2").values -= "option5"

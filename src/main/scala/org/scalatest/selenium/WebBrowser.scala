@@ -943,7 +943,17 @@ trait WebBrowser {
     }
     
     def value_=(value : String) {
-      select.selectByValue(value)
+      try {
+        select.selectByValue(value)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchElementException => 
+          throw new TestFailedException(
+                     sde => Some(e.getMessage),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value_=", 1)
+                   )
+      }
     }
     
     def underlying: WebElement = webElement
@@ -983,8 +993,18 @@ trait WebBrowser {
     }
     
     def values_=(values: Seq[String]) {
-      clearAll()
-      values.foreach(select.selectByValue(_))
+      try {
+        clearAll()
+        values.foreach(select.selectByValue(_))
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchElementException => 
+          throw new TestFailedException(
+                     sde => Some(e.getMessage),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value_=", 1)
+                   )
+      }
     }
     
     def clearAll() {
