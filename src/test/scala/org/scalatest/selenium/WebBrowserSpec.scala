@@ -29,92 +29,443 @@ import org.scalatest.exceptions.TestFailedException
 class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with WebBrowser with HtmlUnit {
 
   describe("textField") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a text field") (pending)
-    it("should, when a valid text field is found, return a TestField instance") (pending)
-    it("should, when multiple matching text fields exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-textfield.html")
+      val caught = intercept[TestFailedException] {
+        textField("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a text field") {
+      go to (host + "find-textfield.html")
+      val caught = intercept[TestFailedException] {
+        textField("area1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a TestField instance") {
+      go to (host + "find-textfield.html")
+      val text1 = textField("text1")
+      text1.value should be ("value1")
+    }
+    it("should, when multiple matching text fields exist, return the first one") {
+      go to (host + "find-textfield.html")
+      val text2 = textField("text2")
+      text2.value should be ("value2")
+    }
   }
 
   describe("textArea") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a text area") (pending)
-    it("should, when a valid text field is found, return a TestArea instance") (pending)
-    it("should, when multiple matching text areas exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-textarea.html")
+      val caught = intercept[TestFailedException] {
+        textArea("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a text area") {
+      go to (host + "find-textarea.html")
+      val caught = intercept[TestFailedException] {
+        textArea("opt1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text area is found, return a TestArea instance") {
+      go to (host + "find-textarea.html")
+      val textarea1 = textArea("textarea1")
+      textarea1.text should be ("value1")
+    }
+    it("should, when multiple matching text areas exist, return the first one") {
+      go to (host + "find-textarea.html")
+      val text2 = textArea("textarea2")
+      text2.text should be ("value2")
+    }
   }
 
   describe("radioButton") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a radio button") (pending)
-    it("should, when a valid text field is found, return a RadioButton instance") (pending)
-    it("should, when multiple matching radio buttons exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-radio.html")
+      val caught = intercept[TestFailedException] {
+        radioButton("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a radio button") {
+      go to (host + "find-radio.html")
+      val caught = intercept[TestFailedException] {
+        radioButton("text1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid radio button is found, return a RadioButton instance") {
+      go to (host + "find-radio.html")
+      val radio = radioButton("group1")
+      radio.value should be ("value1")
+    }
+    it("should, when multiple matching radio buttons exist, return the first one") {
+      go to (host + "find-radio.html")
+      val radio = radioButton("group2")
+      radio.value should be ("value2")
+    }
   }
 
   describe("checkbox") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a checkbox") (pending)
-    it("should, when a valid text field is found, return a Checkbox instance") (pending)
-    it("should, when multiple matching checkboxes exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-checkbox.html")
+      val caught = intercept[TestFailedException] {
+        checkbox("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a checkbox") {
+      go to (host + "find-checkbox.html")
+      val caught = intercept[TestFailedException] {
+        checkbox("text1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a Checkbox instance") {
+      go to (host + "find-checkbox.html")
+      val checkbox1 = checkbox("opt1")
+      checkbox1.isSelected should be (true)
+    }
+    it("should, when multiple matching checkboxes exist, return the first one") {
+      go to (host + "find-checkbox.html")
+      val checkbox2 = checkbox("opt2")
+      checkbox2.isSelected should be (false)
+    }
   }
 
   describe("singleSel") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a single-selection list") (pending)
-    it("should, when a valid text field is found, return a SingleSel instance") (pending)
-    it("should, when multiple matching single-selection lists exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        singleSel("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a single-selection list") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        singleSel("select2")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid single-selection list is found, return a SingleSel instance") {
+      go to (host + "find-select.html")
+      val select1 = singleSel("select1")
+      select1.value should be ("option2")
+    }
+    it("should, when multiple matching single-selection lists exist, return the first one") {
+      go to (host + "find-select.html")
+      val select3 = singleSel("select3")
+      select3.value should be ("option3")
+    }
+    it("should throw TFE with valid stack depth if invalid option is set") {
+      go to (host + "find-select.html")
+      val select1 = singleSel("select1")
+      val caught = intercept[TestFailedException] {
+        select1.value = "something else"
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("multiSel") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
-    it("should throw TFE with valid stack depth if specified is found but is not a multiple-selection list") (pending)
-    it("should, when a valid text field is found, return a MultiSel instance") (pending)
-    it("should, when multiple matching multiple-selection lists exist, return the first one") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        multiSel("unknown")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified is found but is not a multiple-selection list") {
+      go to (host + "find-select.html")
+      val caught = intercept[TestFailedException] {
+        multiSel("select1")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should, when a valid text field is found, return a MultiSel instance") {
+      go to (host + "find-select.html")
+      val select2 = multiSel("select2")
+      select2.values should be (IndexedSeq("option4", "option5"))
+    }
+    it("should, when multiple matching multiple-selection lists exist, return the first one") {
+      go to (host + "find-select.html")
+      val select4 = multiSel("select4")
+      select4.values should be (IndexedSeq("option1", "option3"))
+    }
+    it("should throw TFE with valid stack depth if invalid option is set") {
+      go to (host + "find-select.html")
+      val select2 = multiSel("select2")
+      val caught = intercept[TestFailedException] {
+        select2.values = Seq("option6", "something else")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("click on") {
-    it("should throw TFE with valid stack depth if specified item not found") (pending)
+    it("should throw TFE with valid stack depth if specified item not found") {
+      go to (host + "index.html")
+      val caught = intercept[TestFailedException] {
+        click on "unknown"
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("switch to") {
-    it("should throw TFE with valid stack depth if specified frame not found") (pending)
-    it("should throw TFE with valid stack depth if specified window handle not found") (pending)
+    it("should switch frame correctly and throw TFE with valid stack depth if specified frame not found") {
+      go to (host + "frame.html")
+      val win = windowHandle
+      switch to frame("frame1")
+      switch to window(win)
+      switch to frame("frame2")
+      
+      switch to window(win)
+      switch to frame(0)
+      switch to window(win)
+      switch to frame(1)
+      
+      switch to window(win)
+      switch to frame(id("frame1"))
+      switch to window(win)
+      switch to frame(id("frame2"))
+      
+      switch to window(win)
+      val caught1= intercept[TestFailedException] {
+        switch to frame("frame3")
+      }
+      caught1.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught1.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+      
+      val caught2 = intercept[TestFailedException] {
+        switch to frame(2)
+      }
+      caught2.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught2.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+      
+      val caught3 = intercept[TestFailedException] {
+        switch to frame(id("text1"))
+      }
+      caught3.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught3.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
+    it("should throw TFE with valid stack depth if specified window handle not found") {
+      go to (host + "window.html")
+      val handle = windowHandle
+      switch to window(handle) // should be ok
+      val caught = intercept[TestFailedException] {
+        switch to window("Something else")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("goBack") {
-    it("should throw TFE with valid stack depth if already at oldest page") (pending)
+    it("should have no effect if already at oldest page") {
+      for (i <- 0 to 1000)
+        goBack()
+    }
   }
 
   describe("goForward") {
-    it("should throw TFE with valid stack depth if already at newest page") (pending)
+    it("should have no effect if already at newest page") {
+      for (i <- 0 to 1000)
+        goForward()
+    }
   }
 
   describe("cookie") {
-    it("should throw TFE with valid stack depth if specified cookie is not found") (pending)
+    it("should throw TFE with valid stack depth if specified cookie is not found") {
+      go to (host + "index.html")
+      val caught = intercept[TestFailedException] {
+        cookie("other")
+      }
+      caught.failedCodeLineNumber should be (Some(thisLineNumber - 2))
+      caught.failedCodeFileName should be (Some("WebBrowserSpec.scala"))
+    }
   }
 
   describe("find") {
-    it("should return None if specified item not found") (pending)
-    it("should return a defined Option[Element] containing an instance of TextField if specified item is found to be a text field") (pending)
-    it("should return a defined Option[Element] containing an instance of TextArea if specified item is found to be a text area") (pending)
-    it("should return a defined Option[Element] containing an instance of RadioButton if specified item is found to be a radio button") (pending)
-    it("should return a defined Option[Element] containing an instance of Checkbox if specified item is found to be a checkbox") (pending)
-    it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") (pending)
-    it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") (pending)
-    it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") (pending)
+    it("should return None if specified item not found") {
+      go to (host + "index.html")
+      find("something") should be (None)
+    }
+    it("should return a defined Option[Element] containing an instance of TextField if specified item is found to be a text field") {
+      go to (host + "find-textfield.html")
+      find("text1") match {
+        case Some(textField: TextField) =>
+          textField.value should be ("value1")
+        case other =>
+          fail("Expected Some(textField: TextField), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of TextArea if specified item is found to be a text area") {
+      go to (host + "find-textarea.html")
+      find("textarea1") match {
+        case Some(textArea: TextArea) =>
+          textArea.text should be ("value1")
+        case other => 
+          fail("Expected Some(textArea: TextArea), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of RadioButton if specified item is found to be a radio button") {
+      go to (host + "find-radio.html")
+      find("group2") match {
+        case Some(radio: RadioButton) =>
+          radio.value should be ("value2")
+        case other => 
+          fail("Expected Some(radio: RadioButton), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of Checkbox if specified item is found to be a checkbox") {
+      go to (host + "find-checkbox.html")
+      find("opt1") match {
+        case Some(checkbox: Checkbox) => 
+          checkbox.isSelected should be (true)
+        case other => 
+          fail("Expected Some(checkbox: Checkbox), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") {
+      go to (host + "find-select.html")
+      find("select1") match {
+        case Some(singleSel: SingleSel) => 
+          singleSel.value should be ("option2")
+        case other => 
+          fail("Expected Some(singleSel: SingleSel), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") {
+      go to (host + "find-select.html")
+      find("select2") match {
+        case Some(multiSel: MultiSel) => 
+          multiSel.values should be (IndexedSeq("option4", "option5"))
+        case other =>
+          fail("Expected Some(multiSel: MultiSel), but got: " + other)
+      }
+    }
+    it("should return a defined Option[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") {
+      go to (host + "image.html")
+      find("anImage") match {
+        case Some(element: Element) => 
+          element.tagName should be ("img")
+        case other => 
+          fail("Expected Some(element: Element), but got: " + other)
+      }
+    }
   }
 
   describe("findAll") {
-    it("should return an empty IndexedSeq if specified item not found") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of TextField if specified item is found to be a text field") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of TextArea if specified item is found to be a text area") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of RadioButton if specified item is found to be a radio button") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of Checkbox if specified item is found to be a checkbox") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") (pending)
-    it("should return a defined IndexedSeq[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") (pending)
+    it("should return an empty IndexedSeq if specified item not found") {
+      go to (host + "index.html")
+      findAll("something") should be (IndexedSeq.empty)
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of TextField if specified item is found to be a text field") {
+      go to (host + "find-textfield.html")
+      findAll("text1") match {
+        case IndexedSeq(textField: TextField) => 
+          textField.value should be ("value1")
+        case other => 
+          fail("Expected IndexedSeq(element: TextField), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of TextArea if specified item is found to be a text area") {
+      go to (host + "find-textarea.html")
+      findAll("textarea1") match {
+        case IndexedSeq(textArea: TextArea) =>
+          textArea.text should be ("value1")
+        case other =>
+          fail("Expected IndexedSeq(textArea: TextArea), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of RadioButton if specified item is found to be a radio button") {
+      go to (host + "find-radio.html")
+      findAll("group1") match {
+        case IndexedSeq(radio: RadioButton) =>
+          radio.value should be ("value1")
+        case other =>
+          fail("Expected IndexedSeq(radio: RadioButton), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of Checkbox if specified item is found to be a checkbox") {
+      go to (host + "find-checkbox.html")
+      findAll("opt1") match {
+        case IndexedSeq(checkbox: Checkbox) =>
+          checkbox.value should be ("Option 1")
+        case other =>
+          fail("Expected IndexedSeq(checkbox: Checkbox), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of SingleSel if specified item is found to be a single-selection list") {
+      go to (host + "find-select.html")
+      findAll("select1") match {
+        case IndexedSeq(singleSel: SingleSel) => 
+          singleSel.value should be ("option2")
+        case other =>
+          fail("Expected IndexedSeq(singleSel: SingleSel), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of MultiSel if specified item is found to be a multiple-selection list") {
+      go to (host + "find-select.html")
+      findAll("select2") match {
+        case IndexedSeq(multiSel: MultiSel) => 
+          multiSel.values should be (IndexedSeq("option4", "option5"))
+        case other =>
+          fail("Expected IndexedSeq(multiSel: MultiSel), but got: " + other)
+      }
+    }
+    it("should return a defined IndexedSeq[Element] containing an instance of Element if specified item is found but is not one of the items for which we have defined an Element subclass") {
+      go to (host + "image.html")
+      findAll("anImage") match {
+        case IndexedSeq(image: Element) =>
+          image.tagName should be ("img")
+        case other =>
+          fail("Expected IndexedSeq(image: Element), but got: " + other)  
+      }
+    }
   }
 
   describe("executeScript") {
-    it("should execute the passed JavaScript") (pending)
+    it("should execute the passed JavaScript") {
+      go to (host + "index.html")
+      val result1 = executeScript("return document.title;")
+      result1 should be ("Test Title")
+      val result2 = executeScript("return 'Hello ' + arguments[0]", "ScalaTest")
+      result2 should be ("Hello ScalaTest")
+    }
+  }
+  
+  describe("executeAsyncScript") {
+    it("should execute the passed JavaScript with asynchronous call") {
+      go to (host + "index.html")
+      val script = """
+        var callback = arguments[arguments.length - 1];
+        window.setTimeout(function() {callback('Hello ScalaTest')}, 500);
+        """
+      setScriptTimeout(1 second)
+      val result = executeAsyncScript(script)
+      result should be ("Hello ScalaTest")
+    }
   }
 
   describe("Web Browser") {
@@ -155,39 +506,39 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "textarea.html")
       title should be ("Text Area")
       
-      textField("area1").value should be ("")
-      textField("area1").attribute("value") should be ("")
-      textField("area1").value = "area 1 - line 1\narea 1 - line 2"
-      textField("area1").value should be ("area 1 - line 1\narea 1 - line 2")
-      textField("area1").attribute("value") should be ("area 1 - line 1\narea 1 - line 2")
+      textArea("area1").value should be ("")
+      textArea("area1").attribute("value") should be ("")
+      textArea("area1").value = "area 1 - line 1\narea 1 - line 2"
+      textArea("area1").value should be ("area 1 - line 1\narea 1 - line 2")
+      textArea("area1").attribute("value") should be ("area 1 - line 1\narea 1 - line 2")
       
-      textField("area2").value should be ("")
-      textField("area2").attribute("value") should be ("")
-      textField("area2").value = "area 2 - line 1\narea 2 - line 2"
-      textField("area2").value should be ("area 2 - line 1\narea 2 - line 2")
-      textField("area2").attribute("value") should be ("area 2 - line 1\narea 2 - line 2")
+      textArea("area2").value should be ("")
+      textArea("area2").attribute("value") should be ("")
+      textArea("area2").value = "area 2 - line 1\narea 2 - line 2"
+      textArea("area2").value should be ("area 2 - line 1\narea 2 - line 2")
+      textArea("area2").attribute("value") should be ("area 2 - line 1\narea 2 - line 2")
     }
     
-    it("should get and set radio button correctly.") {
+    it("should get and set radio button group correctly.") {
       go to (host + "radio.html")
       title should be ("Radio Button")
       
-      radioButton("group1").selection should be (None)
+      radioButtonGroup("group1").selection should be (None)
       intercept[TestFailedException] {
-        radioButton("group1").value
+        radioButtonGroup("group1").value
       }
       
-      radioButton("group1").value = "Option 1"
-      radioButton("group1").value should be ("Option 1")
+      radioButtonGroup("group1").value = "Option 1"
+      radioButtonGroup("group1").value should be ("Option 1")
       
-      radioButton("group1").value = "Option 2"
-      radioButton("group1").value should be ("Option 2")
+      radioButtonGroup("group1").value = "Option 2"
+      radioButtonGroup("group1").value should be ("Option 2")
       
-      radioButton("group1").value = "Option 3"
-      radioButton("group1").value should be ("Option 3")
+      radioButtonGroup("group1").value = "Option 3"
+      radioButtonGroup("group1").value should be ("Option 3")
       
       intercept[org.openqa.selenium.NoSuchElementException] {
-        radioButton("group1").value = "Invalid value"
+        radioButtonGroup("group1").value = "Invalid value"
       }
     }
     
@@ -212,62 +563,52 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       go to (host + "select.html")
       title should be ("Select")
       
-      selectList("select1").value should be ("option1")
-      selectList("select1").value = "option2"
-      selectList("select1").value should be ("option2")
-      selectList("select1").value = "option3"
-      selectList("select1").value should be ("option3")
-      selectList("select1").value = "option1"
-      selectList("select1").value should be ("option1")
-      intercept[org.openqa.selenium.NoSuchElementException] {
-        selectList("select1").value = "other"
+      singleSel("select1").value should be ("option1")
+      singleSel("select1").value = "option2"
+      singleSel("select1").value should be ("option2")
+      singleSel("select1").value = "option3"
+      singleSel("select1").value should be ("option3")
+      singleSel("select1").value = "option1"
+      singleSel("select1").value should be ("option1")
+      intercept[TestFailedException] {
+        singleSel("select1").value = "other"
       }
-      selectList("select1").values should have size 1
-      selectList("select1").values(0) should be ("option1")
-      selectList("select1").clear("option2")
-      selectList("select1").value should be ("option1")
-      selectList("select1").clear("option1")
-      selectList("select1").values should have size 1  // single-select cannot be de-selected
-      intercept[UnsupportedOperationException] {
-        selectList("select1").clearAll() // single-select cannot be de-selecte all
-      }
-      selectList("select1").values should have size 1
-      selectList("select1").selections should be (Some(IndexedSeq("option1")))
-      selectList("select1").selections.get should have size 1
       
       // No options selected
-      selectList("select2").selections should be (None)
-      selectList("select2").values should have size 0
-      selectList("select2").values += "option4"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values += "option5"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values should have size 2
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option5")
-      selectList("select2").values += "option6"
-      selectList("select2").value should be ("option4")
-      selectList("select2").values should have size 3
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option5")
-      selectList("select2").values(2) should be ("option6")
-      selectList("select2").selections should be (Some(IndexedSeq("option4", "option5", "option6")))
-      intercept[org.openqa.selenium.NoSuchElementException] {
-        selectList("select2").values += "other"
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
+      multiSel("select2").values += "option4"
+      multiSel("select2").values should be (IndexedSeq("option4"))
+      multiSel("select2").values += "option5"
+      multiSel("select2").values should be (IndexedSeq("option4", "option5"))
+      multiSel("select2").values should have size 2
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option5")
+      multiSel("select2").values += "option6"
+      multiSel("select2").values should be (IndexedSeq("option4", "option5", "option6"))
+      multiSel("select2").values should have size 3
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option5")
+      multiSel("select2").values(2) should be ("option6")
+      multiSel("select2").selections should be (Some(IndexedSeq("option4", "option5", "option6")))
+      intercept[TestFailedException] {
+        multiSel("select2").values += "other"
       }
-      selectList("select2").values -= "option5"
-      selectList("select2").values should have size 2
-      selectList("select2").values(0) should be ("option4")
-      selectList("select2").values(1) should be ("option6")
-      selectList("select2").clearAll()
-      selectList("select2").selections should be (None)
-      selectList("select2").values should have size 0
+      multiSel("select2").values -= "option5"
+      multiSel("select2").values should have size 2
+      multiSel("select2").values(0) should be ("option4")
+      multiSel("select2").values(1) should be ("option6")
+      multiSel("select2").clearAll()
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
       
       // Test the alternative way to clear
-      selectList("select2").values += "option6"
-      selectList("select2").values should have size 1
-      selectList("select2").values(0) should be ("option6")
-      selectList("select2") clear "option6"
+      multiSel("select2").values += "option6"
+      multiSel("select2").values should have size 1
+      multiSel("select2").values(0) should be ("option6")
+      multiSel("select2") clear "option6"
+      multiSel("select2").selections should be (None)
+      multiSel("select2").values should have size 0
     }
     
     it("should submit form when submit is called on form's element.") {
@@ -331,17 +672,23 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       cookie("name3").value should be ("value3")
       
       delete cookie "name2"
-      cookie("name2") should be (null)
+      intercept[TestFailedException] {
+        cookie("name2") should be (null)
+      }
       cookie("name1").value should be ("value1")
       cookie("name3").value should be ("value3")
       
       delete all cookies
-      cookie("name1") should be (null)
-      cookie("name3") should be (null)
+      intercept[TestFailedException] {
+        cookie("name1") should be (null)
+      }
+      intercept[TestFailedException] {
+        cookie("name3") should be (null)
+      }
     }
     
     it("should support implicitlyWait method") {
-      implicitlyWait(Span(10, Seconds))
+      implicitlyWait(Span(2, Seconds))
     }
   
     it("should support capturing screenshot") {
@@ -407,6 +754,15 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
       switch to frame("name")
       switch to window(windowHandle)
     }
+  }
+  
+  def thisLineNumber = {
+    val st = Thread.currentThread.getStackTrace
+
+    if (!st(2).getMethodName.contains("thisLineNumber"))
+      st(2).getLineNumber
+    else
+      st(3).getLineNumber
   }
 }
 

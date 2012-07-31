@@ -42,7 +42,9 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import org.openqa.selenium.Alert
 import org.openqa.selenium.support.ui.Select
-import org.scalatest.Assertions.fail
+import org.scalatest.exceptions.TestFailedException
+import org.scalatest.exceptions.StackDepthException
+import org.openqa.selenium.JavascriptExecutor
 
 /**
  * Trait that provides a domain specific language (DSL) for writing browser-based tests using <a href="http://seleniumhq.org">Selenium</a>.  
@@ -720,31 +722,86 @@ trait WebBrowser {
   }
     
   final class FrameIndexTarget(index: Int) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(index)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(index)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame at index '" + index + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
   
   final class FrameNameOrIdTarget(nameOrId: String) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(nameOrId)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(nameOrId)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame with name or ID '" + nameOrId + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
   
   final class FrameWebElementTarget(element: WebElement) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.frame(element)
-    }
+    def switch(driver: WebDriver): WebDriver = 
+      try {
+        driver.switchTo.frame(element)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchFrameException => 
+          throw new TestFailedException(
+                     sde => Some("Frame element '" + element + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
 
   final class WindowTarget(nameOrHandle: String) extends SwitchTarget[WebDriver] {
-    def switch(driver: WebDriver): WebDriver = {
-      driver.switchTo.window(nameOrHandle)
-    }
+    def switch(driver: WebDriver): WebDriver =
+      try {
+        driver.switchTo.window(nameOrHandle)
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchWindowException => 
+          throw new TestFailedException(
+                     sde => Some("Window with nameOrHandle '" + nameOrHandle + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "switch", 1)
+                   )
+      }
   }
+  
+  private def isTextField(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "input" && webElement.getAttribute("type").toLowerCase == "text"
 
-  // TODO: require(webElement.getTagName == "input" || webElement.getTagName == "textarea") ???
+  private def isTextArea(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "textarea"
+  
+  private def isCheckBox(webElement: WebElement): Boolean = 
+    webElement.getTagName.toLowerCase == "input" && webElement.getAttribute("type").toLowerCase == "checkbox"
+      
+  private def isRadioButton(webElement: WebElement): Boolean = 
+    webElement.getTagName == "input" && webElement.getAttribute("type") == "radio"
+      
   final class TextField(webElement: WebElement) extends Element {
+    
+    if(!isTextField(webElement))
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not text field."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
     def value: String = webElement.getAttribute("value")  
     def value_=(value: String) {
       webElement.clear()
@@ -754,17 +811,59 @@ trait WebBrowser {
     def attribute(name: String): String = webElement.getAttribute(name)
     def underlying: WebElement = webElement
   }
+  
+  final class TextArea(webElement: WebElement) extends Element {
+    if(!isTextArea(webElement))
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not text area."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
+    def value: String = webElement.getAttribute("value")
+    def value_=(value: String) {
+      webElement.clear()
+      webElement.sendKeys(value)
+    }
+    def text: String = webElement.getText
+    def attribute(name: String): String = webElement.getAttribute(name)
+    def underlying: WebElement = webElement
+  }
+  
+  final class RadioButton(webElement: WebElement) extends Element {
+    if(!isRadioButton(webElement))
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not radio button."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    def value: String = webElement.getAttribute("value")
+    def underlying: WebElement = webElement
+  }
 
-  final class RadioButton(groupName: String, driver: WebDriver) {
+  final class RadioButtonGroup(groupName: String, driver: WebDriver) {
+    
+    private def groupElements = driver.findElements(By.name(groupName)).toList.filter(isRadioButton(_))
+    
+    if (groupElements.length == 0)
+      throw new TestFailedException(
+                     sde => Some("Radio Buttons with group name '" + groupName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     
     def value: String = selection match {
       case Some(v) => v
-      case None => fail("The Option on which value was invoked was not defined.")
+      case None => 
+        throw new TestFailedException(
+                     sde => Some("The Option on which value was invoked was not defined."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value", 1)
+                   )
     }
 
     def selection: Option[String] = {
-      val radios = driver.findElements(By.name(groupName)).toList
-      radios.find(_.isSelected) match {
+      groupElements.find(_.isSelected) match {
         case Some(radio) => 
           Some(radio.getAttribute("value"))
         case None =>
@@ -773,8 +872,7 @@ trait WebBrowser {
     }
     
     def value_=(value: String) {
-      val radios = driver.findElements(By.name(groupName)).toList
-      radios.find(_.getAttribute("value") == value) match {
+      groupElements.find(_.getAttribute("value") == value) match {
         case Some(radio) => 
           radio.click()
         case None =>
@@ -784,6 +882,13 @@ trait WebBrowser {
   }
 
   final class Checkbox(webElement: WebElement) extends Element {
+    if(!isCheckBox(webElement))
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not check box."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    
     def select() {
       if (!webElement.isSelected)
         webElement.click()
@@ -792,21 +897,32 @@ trait WebBrowser {
       if (webElement.isSelected())
         webElement.click()
     }
+    def value: String = webElement.getAttribute("value")
     def underlying: WebElement = webElement
   }
   
-  // TODO: Do I throw an exception from += if it isn't there? Actually I think this may be wrong. Need
-  // To actually do it to the ...
-  class RichIndexedSeq(indexedSeq: IndexedSeq[String]) {
-      def +(value: String): IndexedSeq[String] = indexedSeq :+ value
-      def -(value: String): IndexedSeq[String] = indexedSeq.filter(_ != value)
+  class RichIndexedSeq(seq: Seq[String]) {
+      def +(value: String): Seq[String] = seq :+ value
+      def -(value: String): Seq[String] = seq.filter(_ != value)
   }
   
-  implicit def vector2RichIndexedSeq(indexedSeq: IndexedSeq[String]): RichIndexedSeq = new RichIndexedSeq(indexedSeq)
+  implicit def vector2RichIndexedSeq(seq: Seq[String]): RichIndexedSeq = new RichIndexedSeq(seq)
   
   // Should never return null.
-  class StSelect(webElement: WebElement) extends Element {
+  class SingleSel(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "select")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     private val select = new Select(webElement)
+    if (select.isMultiple)
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not a single-selection list."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     
     def selection = {
       val first = select.getFirstSelectedOption
@@ -818,24 +934,51 @@ trait WebBrowser {
     
     def value: String = selection match {
       case Some(v) => v
-      case None => fail("The Option on which value was invoked was not defined.")
+      case None => 
+        throw new TestFailedException(
+                     sde => Some("The Option on which value was invoked was not defined."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value", 1)
+                   )
     }
     
     def value_=(value : String) {
       try {
-        clearAll()
+        select.selectByValue(value)
       }
       catch {
-        case e: java.lang.UnsupportedOperationException => // Can happen for single select list
+        case e: org.openqa.selenium.NoSuchElementException => 
+          throw new TestFailedException(
+                     sde => Some(e.getMessage),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value_=", 1)
+                   )
       }
-      select.selectByValue(value)
     }
+    
+    def underlying: WebElement = webElement
+  }
+
+  class MultiSel(webElement: WebElement) extends Element {
+    if(webElement.getTagName.toLowerCase != "select")
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not select."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
+    private val select = new Select(webElement)
+    if (!select.isMultiple)
+      throw new TestFailedException(
+                     sde => Some("Element " + webElement + " is not a multi-selection list."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "this", 1)
+                   )
     
     def clear(value: String) {
       select.deselectByValue(value)
     }
   
-    def selections = {
+    def selections: Option[Seq[String]] = {
       val elementSeq = select.getAllSelectedOptions.toIndexedSeq
       val valueSeq = elementSeq.map(_.getAttribute("value"))
       if (valueSeq.length > 0)
@@ -844,14 +987,24 @@ trait WebBrowser {
         None
     }
 
-    def values: IndexedSeq[String] = selections match {
+    def values: Seq[String] = selections match {
       case Some(v) => v
       case None => IndexedSeq.empty
     }
     
-    def values_=(values: IndexedSeq[String]) {
-      clearAll()
-      values.foreach(select.selectByValue(_))
+    def values_=(values: Seq[String]) {
+      try {
+        clearAll()
+        values.foreach(select.selectByValue(_))
+      }
+      catch {
+        case e: org.openqa.selenium.NoSuchElementException => 
+          throw new TestFailedException(
+                     sde => Some(e.getMessage),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "value_=", 1)
+                   )
+      }
     }
     
     def clearAll() {
@@ -860,7 +1013,7 @@ trait WebBrowser {
     
     def underlying: WebElement = webElement
   }
-
+  
   object go {
     def to(url: String)(implicit driver: WebDriver) {
       driver.get(url)
@@ -881,55 +1034,245 @@ trait WebBrowser {
   
   def currentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
   
-  def id(elementId: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.id(elementId))
+  def id(elementId: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.id(elementId)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with id '" + elementId + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "id", 1)
+                   )
+  }
+    
+  val ID = (elementId: String, driver: WebDriver) => id(elementId)(driver) 
   
-  def name(elementName: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.name(elementName))
+  def name(elementName: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.name(elementName)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with name '" + elementName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "name", 1)
+                   )
+  }
+    
+  val NAME = (elementName: String, driver: WebDriver) => name(elementName)(driver)
   
-  def idOrName(elementIdOrName: String)(implicit driver: WebDriver): WebElement = {
-    try {
-      id(elementIdOrName)
+  def element(name: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]])(implicit driver: WebDriver): WebElement = {
+    var element: WebElement = null
+    lookups.find { c => 
+      try {
+        element = c(name, driver)
+        true
+      } 
+      catch {
+        case _ => false
+      }
+    } match {
+      case Some(_) => element
+      case None  => 
+        throw new TestFailedException(
+                     sde => Some("Element '" + name + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "element", 1)
+                   )
     }
-    catch {
-      case _ => 
-        name(elementIdOrName)
+  }
+    
+  def xpath(path: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.xpath(path)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with xpath '" + path + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "xpath", 1)
+                   )
+  }
+    
+  val XPATH = (path: String, driver: WebDriver) => xpath(path)(driver)
+  
+  def className(className: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.className(className)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with className '" + className + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "className", 1)
+                   )
+  }
+    
+  val CLASSNAME = (clazzName: String, driver: WebDriver) => className(clazzName)(driver)
+  
+  def cssSelector(cssSelector: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.cssSelector(cssSelector)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with cssSelector '" + cssSelector + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "cssSelector", 1)
+                   )
+  }
+    
+  val CSSSELECTOR = (selector: String, driver: WebDriver) => cssSelector(selector)(driver)
+  
+  def linkText(linkText: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.linkText(linkText)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with linkText '" + linkText + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "linkText", 1)
+                   )
+  }
+    
+  val LINKTEXT = (lText: String, driver: WebDriver) => linkText(lText)(driver)
+  
+  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.partialLinkText(partialLinkText)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with partialLinkText '" + partialLinkText + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "partialLinkText", 1)
+                   )
+  }
+    
+  val PARTIALLINKTEXT = (plText: String, driver: WebDriver) => partialLinkText(plText)(driver)
+  
+  def tagName(tagName: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.tagName(tagName)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
+                     sde => Some("Element with tagName '" + tagName + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "tagName", 1)
+                   )
+  }
+    
+  val TAGNAME = (tName: String, driver: WebDriver) => tagName(tName)(driver)
+    
+  private def createTypedElement(element: WebElement): Element = {
+    if (isTextField(element))
+      new TextField(element)
+    else if (isTextArea(element))
+      new TextArea(element)
+    else if (isCheckBox(element))
+      new Checkbox(element)
+    else if (isRadioButton(element))
+      new RadioButton(element)
+    else if (element.getTagName.toLowerCase == "select") {
+      val select = new Select(element)
+      if (select.isMultiple)
+        new MultiSel(element)
+      else
+        new SingleSel(element)
+    }
+    else
+      new Element() { def underlying = element }
+  }
+    
+  def find(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): Option[Element] = {
+    // For performance purpose to avoid executing the lookup 2 times.
+    var element: WebElement = null
+    lookups.find { c => 
+      try {
+        val elementSeq: Seq[WebElement] = c(lookupValue, driver)
+        if (elementSeq.length > 0) {
+          element = elementSeq(0)
+          true
+        }
+        else
+          false
+      } 
+      catch {
+        case _ => false
+      }
+    } match {
+      case Some(_) => Some(createTypedElement(element))
+      case None  => None
     }
   }
   
-  def xpath(path: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.xpath(path))
+  def findAll(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): Seq[Element] = {
+    // For performance purpose to avoid executing the lookup 2 times.
+    var elements: Seq[WebElement] = IndexedSeq.empty
+    lookups.find { c => 
+      try {
+        elements = c(lookupValue, driver)
+        if (elements.length > 0) 
+          true
+        else
+          false
+      } 
+      catch {
+        case _ => false
+      }
+    } match {
+      case Some(_) => elements.map(createTypedElement(_))
+      case None  => Seq.empty
+    }
+  }
   
-  def className(className: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.className(className))
-  
-  def cssSelector(cssSelector: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.cssSelector(cssSelector))
-  
-  def linkText(linkText: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.linkText(linkText))
-  
-  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.partialLinkText(partialLinkText))
-  
-  def tagName(tagName: String)(implicit driver: WebDriver): WebElement = driver.findElement(By.tagName(tagName))
+  implicit def seq2WebElement(elementSeq: Seq[WebElement]): WebElement = elementSeq(0)
   
   def textField(webElement: WebElement) = new TextField(webElement)
   
-  def textField(elementIdOrName: String)(implicit driver: WebDriver) = new TextField(idOrName(elementIdOrName))
+  def textField(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new TextField(element(lookupValue, lookups))
   
-  def radioButton(groupName: String)(implicit driver: WebDriver) = new RadioButton(groupName, driver)
+  def textArea(webElement: WebElement) = new TextArea(webElement)
+  
+  def textArea(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new TextArea(element(lookupValue, lookups))
+  
+  def radioButtonGroup(groupName: String)(implicit driver: WebDriver) = new RadioButtonGroup(groupName, driver)
+  
+  def radioButton(webElement: WebElement) = new RadioButton(webElement)
+  
+  def radioButton(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new RadioButton(element(lookupValue, lookups))
   
   def checkbox(webElement: WebElement) = new Checkbox(webElement)
   
-  def checkbox(elementIdOrName: String)(implicit driver: WebDriver) = new Checkbox(idOrName(elementIdOrName))
+  def checkbox(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new Checkbox(element(lookupValue, lookups))
   
-  def selectList(webElement: WebElement) = new StSelect(webElement)
+  def singleSel(webElement: WebElement) = new SingleSel(webElement)
   
-  def selectList(elementIdOrName: String)(implicit driver: WebDriver) = new StSelect(idOrName(elementIdOrName))
+  def singleSel(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new SingleSel(element(lookupValue, lookups))
   
-  def button(elementIdOrName: String)(implicit driver: WebDriver): WebElement = idOrName(elementIdOrName)
+  def multiSel(webElement: WebElement) = new MultiSel(webElement)
+  
+  def multiSel(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+    new MultiSel(element(lookupValue, lookups))
+  
+  def button(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): WebElement = 
+    element(lookupValue, lookups)
   
   object click {
     def on(element: WebElement) {
       element.click()
     }
   
-    def on(elementIdOrName: String)(implicit driver: WebDriver) {
-      on(idOrName(elementIdOrName))
+    def on(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) {
+      on(element(lookupValue, lookups))
     }
   }
   
@@ -1017,7 +1360,11 @@ trait WebBrowser {
       case Some(cookie) => 
         new CookieWrapper(cookie)
       case None =>
-        null
+        throw new TestFailedException(
+                     sde => Some("Cookie '" + name + "' not found."),
+                     None,
+                     getStackDepthFun("WebBrowser.scala", "getCookie", 1)
+                   )
     }
   }
   
@@ -1098,12 +1445,71 @@ trait WebBrowser {
         }
     }
   }
+  
+  def executeScript(script: String, args: AnyRef*)(implicit driver: WebDriver): AnyRef =
+    driver match {
+      case executor: JavascriptExecutor => executor.executeScript(script, args.toArray : _*)
+      case _ => throw new UnsupportedOperationException("Web driver " + driver.getClass.getName + " does not support javascript execution.")
+    }
+  
+  def executeAsyncScript(script: String, args: AnyRef*)(implicit driver: WebDriver): AnyRef =
+    driver match {
+      case executor: JavascriptExecutor => executor.executeAsyncScript(script, args.toArray : _*)
+      case _ => throw new UnsupportedOperationException("Web driver " + driver.getClass.getName + " does not support javascript execution.")
+    }
+  
+  def setScriptTimeout(timeout: Span)(implicit driver: WebDriver) {
+    driver.manage().timeouts().setScriptTimeout(timeout.totalNanos, TimeUnit.NANOSECONDS);
+  }
+  
+  private def getStackDepthFun(fileName: String, methodName: String, adjustment: Int = 0): (StackDepthException => Int) = { sde =>
+    getStackDepth(sde.getStackTrace, fileName, methodName, adjustment)
+  }
+  
+  private def getStackDepth(stackTrace: Array[StackTraceElement], fileName: String, methodName: String, adjustment: Int = 0) = {
+    val stackTraceList = stackTrace.toList
+
+    val fileNameIsDesiredList: List[Boolean] =
+      for (element <- stackTraceList) yield
+        element.getFileName == fileName // such as "Checkers.scala"
+
+    val methodNameIsDesiredList: List[Boolean] =
+      for (element <- stackTraceList) yield
+        element.getMethodName == methodName // such as "check"
+
+    // For element 0, the previous file name was not desired, because there is no previous
+    // one, so you start with false. For element 1, it depends on whether element 0 of the stack trace
+    // had the desired file name, and so forth.
+    val previousFileNameIsDesiredList: List[Boolean] = false :: (fileNameIsDesiredList.dropRight(1))
+
+    // Zip these two related lists together. They now have two boolean values together, when both
+    // are true, that's a stack trace element that should be included in the stack depth.
+    val zipped1 = methodNameIsDesiredList zip previousFileNameIsDesiredList
+    val methodNameAndPreviousFileNameAreDesiredList: List[Boolean] =
+      for ((methodNameIsDesired, previousFileNameIsDesired) <- zipped1) yield
+        methodNameIsDesired && previousFileNameIsDesired
+
+    // Zip the two lists together, that when one or the other is true is an include.
+    val zipped2 = fileNameIsDesiredList zip methodNameAndPreviousFileNameAreDesiredList
+    val includeInStackDepthList: List[Boolean] =
+      for ((fileNameIsDesired, methodNameAndPreviousFileNameAreDesired) <- zipped2) yield
+        fileNameIsDesired || methodNameAndPreviousFileNameAreDesired
+
+    val includeDepth = includeInStackDepthList.takeWhile(include => include).length
+    val depth = if (includeDepth == 0 && stackTrace(0).getFileName != fileName && stackTrace(0).getMethodName != methodName) 
+      stackTraceList.takeWhile(st => st.getFileName != fileName || st.getMethodName != methodName).length
+    else
+      includeDepth
+    
+    depth + adjustment
+  }
 }
 
 object WebBrowser extends WebBrowser
 
 trait HtmlUnit extends WebBrowser {
   implicit val webDriver = new HtmlUnitDriver()
+  webDriver.setJavascriptEnabled(true)
 }
 object HtmlUnit extends HtmlUnit
 
