@@ -262,14 +262,18 @@ class WebBrowserSpec extends JettySpec with ShouldMatchers with SpanSugar with W
     }
   }
 
-  // Does not seems to be supported by selenium, unless we want to implement the history tracking ourselves.
   describe("goBack") {
-    it("should throw TFE with valid stack depth if already at oldest page") (pending)
+    it("should have no effect if already at oldest page") {
+      for (i <- 0 to 1000)
+        goBack()
+    }
   }
 
-  // Does not seems to be supported by selenium, unless we want to implement the history tracking ourselves.
   describe("goForward") {
-    it("should throw TFE with valid stack depth if already at newest page") (pending)
+    it("should have no effect if already at newest page") {
+      for (i <- 0 to 1000)
+        goForward()
+    }
   }
 
   describe("cookie") {
