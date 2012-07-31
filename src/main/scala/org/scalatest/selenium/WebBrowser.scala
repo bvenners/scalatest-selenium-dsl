@@ -901,12 +901,12 @@ trait WebBrowser {
     def underlying: WebElement = webElement
   }
   
-  class RichIndexedSeq(indexedSeq: IndexedSeq[String]) {
-      def +(value: String): IndexedSeq[String] = indexedSeq :+ value
-      def -(value: String): IndexedSeq[String] = indexedSeq.filter(_ != value)
+  class RichIndexedSeq(seq: Seq[String]) {
+      def +(value: String): Seq[String] = seq :+ value
+      def -(value: String): Seq[String] = seq.filter(_ != value)
   }
   
-  implicit def vector2RichIndexedSeq(indexedSeq: IndexedSeq[String]): RichIndexedSeq = new RichIndexedSeq(indexedSeq)
+  implicit def vector2RichIndexedSeq(seq: Seq[String]): RichIndexedSeq = new RichIndexedSeq(seq)
   
   // Should never return null.
   class SingleSel(webElement: WebElement) extends Element {
@@ -968,7 +968,7 @@ trait WebBrowser {
       select.deselectByValue(value)
     }
   
-    def selections = {
+    def selections: Option[Seq[String]] = {
       val elementSeq = select.getAllSelectedOptions.toIndexedSeq
       val valueSeq = elementSeq.map(_.getAttribute("value"))
       if (valueSeq.length > 0)
@@ -977,12 +977,12 @@ trait WebBrowser {
         None
     }
 
-    def values: IndexedSeq[String] = selections match {
+    def values: Seq[String] = selections match {
       case Some(v) => v
       case None => IndexedSeq.empty
     }
     
-    def values_=(values: IndexedSeq[String]) {
+    def values_=(values: Seq[String]) {
       clearAll()
       values.foreach(select.selectByValue(_))
     }
@@ -1014,33 +1014,31 @@ trait WebBrowser {
   
   def currentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
   
-  def id(elementId: String)(implicit driver: WebDriver): Seq[WebElement] = 
-    try { 
-      driver.findElements(By.id(elementId)).toSeq
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def id(elementId: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.id(elementId)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with id '" + elementId + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "id", 1)
                    )
-    }
+  }
     
   val ID = (elementId: String, driver: WebDriver) => id(elementId)(driver) 
   
-  def name(elementName: String)(implicit driver: WebDriver): Seq[WebElement] = 
-    try {
-      driver.findElements(By.name(elementName)).toSeq
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def name(elementName: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.name(elementName)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with name '" + elementName + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "name", 1)
                    )
-    }
+  }
     
   val NAME = (elementName: String, driver: WebDriver) => name(elementName)(driver)
   
@@ -1065,93 +1063,87 @@ trait WebBrowser {
     }
   }
     
-  def xpath(path: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.xpath(path))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def xpath(path: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.xpath(path)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with xpath '" + path + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "xpath", 1)
                    )
-    }
+  }
     
   val XPATH = (path: String, driver: WebDriver) => xpath(path)(driver)
   
-  def className(className: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.className(className))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def className(className: String)(implicit driver: WebDriver): Seq[WebElement] = { 
+    val elements = driver.findElements(By.className(className)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with className '" + className + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "className", 1)
                    )
-    }
+  }
     
   val CLASSNAME = (clazzName: String, driver: WebDriver) => className(clazzName)(driver)
   
-  def cssSelector(cssSelector: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.cssSelector(cssSelector))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def cssSelector(cssSelector: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.cssSelector(cssSelector)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with cssSelector '" + cssSelector + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "cssSelector", 1)
                    )
-    }
+  }
     
   val CSSSELECTOR = (selector: String, driver: WebDriver) => cssSelector(selector)(driver)
   
-  def linkText(linkText: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.linkText(linkText))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def linkText(linkText: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.linkText(linkText)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with linkText '" + linkText + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "linkText", 1)
                    )
-    }
+  }
     
   val LINKTEXT = (lText: String, driver: WebDriver) => linkText(lText)(driver)
   
-  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.partialLinkText(partialLinkText))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def partialLinkText(partialLinkText: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.partialLinkText(partialLinkText)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with partialLinkText '" + partialLinkText + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "partialLinkText", 1)
                    )
-    }
+  }
     
   val PARTIALLINKTEXT = (plText: String, driver: WebDriver) => partialLinkText(plText)(driver)
   
-  def tagName(tagName: String)(implicit driver: WebDriver): WebElement = 
-    try {
-      driver.findElement(By.tagName(tagName))
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        throw new TestFailedException(
+  def tagName(tagName: String)(implicit driver: WebDriver): Seq[WebElement] = {
+    val elements = driver.findElements(By.tagName(tagName)).toSeq
+    if (elements.length > 0)
+      elements
+    else
+      throw new TestFailedException(
                      sde => Some("Element with tagName '" + tagName + "' not found."),
                      None,
                      getStackDepthFun("WebBrowser.scala", "tagName", 1)
                    )
-    }
+  }
     
   val TAGNAME = (tName: String, driver: WebDriver) => tagName(tName)(driver)
     
