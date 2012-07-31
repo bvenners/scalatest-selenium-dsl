@@ -897,6 +897,7 @@ trait WebBrowser {
       if (webElement.isSelected())
         webElement.click()
     }
+    def value: String = webElement.getAttribute("value")
     def underlying: WebElement = webElement
   }
   
@@ -1013,9 +1014,9 @@ trait WebBrowser {
   
   def currentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
   
-  def id(elementId: String)(implicit driver: WebDriver): WebElement = 
+  def id(elementId: String)(implicit driver: WebDriver): Seq[WebElement] = 
     try { 
-      driver.findElement(By.id(elementId))
+      driver.findElements(By.id(elementId)).toSeq
     }
     catch {
       case e: org.openqa.selenium.NoSuchElementException => 
@@ -1028,9 +1029,9 @@ trait WebBrowser {
     
   val ID = (elementId: String, driver: WebDriver) => id(elementId)(driver) 
   
-  def name(elementName: String)(implicit driver: WebDriver): WebElement = 
+  def name(elementName: String)(implicit driver: WebDriver): Seq[WebElement] = 
     try {
-      driver.findElement(By.name(elementName))
+      driver.findElements(By.name(elementName)).toSeq
     }
     catch {
       case e: org.openqa.selenium.NoSuchElementException => 
@@ -1043,7 +1044,7 @@ trait WebBrowser {
     
   val NAME = (elementName: String, driver: WebDriver) => name(elementName)(driver)
   
-  def element(name: String, lookups: Seq[(String, WebDriver) => WebElement])(implicit driver: WebDriver): WebElement = {
+  def element(name: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]])(implicit driver: WebDriver): WebElement = {
     var element: WebElement = null
     lookups.find { c => 
       try {
@@ -1174,62 +1175,83 @@ trait WebBrowser {
       new Element() { def underlying = element }
   }
     
-  def find(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver): Option[Element] = {
-    try {
-      // For performance purpose to avoid executing the lookup 2 times.
-      var element: WebElement = null
-      lookups.find { c => 
-        try {
-          element = c(lookupValue, driver)
+  def find(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): Option[Element] = {
+    // For performance purpose to avoid executing the lookup 2 times.
+    var element: WebElement = null
+    lookups.find { c => 
+      try {
+        val elementSeq: Seq[WebElement] = c(lookupValue, driver)
+        if (elementSeq.length > 0) {
+          element = elementSeq(0)
           true
-        } 
-        catch {
-          case _ => false
         }
-      } match {
-        case Some(_) => Some(createTypedElement(element))
-        case None  => None
+        else
+          false
+      } 
+      catch {
+        case _ => false
       }
-    }
-    catch {
-      case e: org.openqa.selenium.NoSuchElementException => 
-        None
+    } match {
+      case Some(_) => Some(createTypedElement(element))
+      case None  => None
     }
   }
   
+  def findAll(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): Seq[Element] = {
+    // For performance purpose to avoid executing the lookup 2 times.
+    var elements: Seq[WebElement] = IndexedSeq.empty
+    lookups.find { c => 
+      try {
+        elements = c(lookupValue, driver)
+        if (elements.length > 0) 
+          true
+        else
+          false
+      } 
+      catch {
+        case _ => false
+      }
+    } match {
+      case Some(_) => elements.map(createTypedElement(_))
+      case None  => Seq.empty
+    }
+  }
+  
+  implicit def seq2WebElement(elementSeq: Seq[WebElement]): WebElement = elementSeq(0)
+  
   def textField(webElement: WebElement) = new TextField(webElement)
   
-  def textField(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def textField(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new TextField(element(lookupValue, lookups))
   
   def textArea(webElement: WebElement) = new TextArea(webElement)
   
-  def textArea(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def textArea(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new TextArea(element(lookupValue, lookups))
   
   def radioButtonGroup(groupName: String)(implicit driver: WebDriver) = new RadioButtonGroup(groupName, driver)
   
   def radioButton(webElement: WebElement) = new RadioButton(webElement)
   
-  def radioButton(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def radioButton(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new RadioButton(element(lookupValue, lookups))
   
   def checkbox(webElement: WebElement) = new Checkbox(webElement)
   
-  def checkbox(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def checkbox(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new Checkbox(element(lookupValue, lookups))
   
   def singleSel(webElement: WebElement) = new SingleSel(webElement)
   
-  def singleSel(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def singleSel(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new SingleSel(element(lookupValue, lookups))
   
   def multiSel(webElement: WebElement) = new MultiSel(webElement)
   
-  def multiSel(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) = 
+  def multiSel(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) = 
     new MultiSel(element(lookupValue, lookups))
   
-  def button(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver): WebElement = 
+  def button(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver): WebElement = 
     element(lookupValue, lookups)
   
   object click {
@@ -1237,7 +1259,7 @@ trait WebBrowser {
       element.click()
     }
   
-    def on(lookupValue: String, lookups: Seq[(String, WebDriver) => WebElement] = Seq(ID, NAME))(implicit driver: WebDriver) {
+    def on(lookupValue: String, lookups: Seq[(String, WebDriver) => Seq[WebElement]] = Seq(ID, NAME))(implicit driver: WebDriver) {
       on(element(lookupValue, lookups))
     }
   }
